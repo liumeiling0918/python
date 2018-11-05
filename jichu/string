@@ -1,0 +1,33 @@
+captlze首字母大写
+      upper()全大写
+      lower()全小写
+      find通过元素找索引，找不到-1
+      index()通过元素找索引，找不到 报错
+      swpcase 大小写翻转
+
+      repalce(old,new,count)count为替换的次数
+      isdigit() 返回bool值
+      isapha()
+      isnumpha()
+      startswith endswith
+      title 被特殊字符分割后首字母大写
+      center（）居中
+      strip（）lstrip rstrip 去除前后空格或者 去除前后的特殊字符
+      split 切割
+      format 格式化输出
+      {}
+      #format的三种玩法 格式化输出
+      1.按顺序进行格式化
+        # s = '我叫{}，今年{}，爱好{}，再说一下我叫{}'.format('太白',36,'girl','太白')
+      2.按索引进行格式化
+        # name = input('请输入名字：')
+        # s = '我叫{0}，今年{1}，爱好{2}，再说一下我叫{0}'.format(name,36,'girl')
+      3.按变量进行格式化 以key:value的形式
+        # name = input('请输入名字：')
+        # s = '我叫{name}，今年{age}，爱好{hobby}，再说一下我叫{name}'.format(age=18,name=name,hobby='girl')
+      
+      len() 长度
+      count 计数
+
+      for i in 可迭代对象：
+        pass
