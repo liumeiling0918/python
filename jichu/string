@@ -6,7 +6,7 @@ captlze首字母大写
       swpcase 大小写翻转
 
       repalce(old,new,count)count为替换的次数
-      isdigit() 返回bool值
+      isdigit() 是否为数字，返回bool值
       isapha()
       isnumpha()
       startswith endswith
