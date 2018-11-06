@@ -7,7 +7,7 @@ captlze首字母大写
 
       repalce(old,new,count)count为替换的次数
       isdigit() 是否为数字，返回bool值
-      isapha()
+      isapha() 是否又由字母组成
       isnumpha()
       startswith endswith
       title 被特殊字符分割后首字母大写
