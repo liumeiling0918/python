@@ -1,0 +1,35 @@
+列表：增 append  insert extend
+append 将元素作为一个整体添加在末尾位置
+insert 在指定位置插入
+extend 将元素分下来添加在末尾位置
+      删 remove pop clear del
+      改 li[索引] = '被修改的内容'  li[切片]：'被修改的内容'例：li[0:3]=
+      查 for循环
+      range(start:end:step) 含头不含尾
+      range(n) 默认从0开始，0~n-1
+ 元祖：
+      count()
+      len()
+      li.index('元素')
+      sort（reverse = True）
+      li.sort()
+      print(li.sort())
+      reverse()反转
+ 字典：
+ #数据类型划分：可变数据类型，不可变数据类型
+不可变数据类型：元组，bool int str       可哈希
+可变数据类型：list，dict set             不可哈希
+dict key 必须是不可变数据类型，可哈希，
+    value：任意数据类型。
+dict 优点：二分查找去查询
+         存储大量的关系型数据
+      特点：无序的
+  setdefault(key,value) 若没有键值对则添加，若有键值对，则不改变原有键值对    
+  pop(key) 删除对应的键值对，并返回被删除的value
+  pop(key,返回值) 可以设置返回值，若没有该key时，返回所设置的值
+  popitem() 随机删除，并返回删除的键值对
+  dic.update() 更新dict
+  keys() 返回所有的keys 例如dict_keys(['sex', 'age', 'name'])
+  values() 返回所有的values 例如dict_values(['male', 18, 'jin'])
+  items() 返回所有的items  例如dict_items([('sex', 'male'), ('age', 18), ('name', 'jin')])
+  a,b = b,a 交换a,b的值
