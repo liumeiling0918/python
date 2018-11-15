@@ -1,0 +1,8 @@
+1.创建app
+   python manage.py startapp app_name
+2.安装命令
+   pip install pymysql
+3.ORM相关命令
+    python manage.py makemigrations
+    python manage.py migrate
+    
