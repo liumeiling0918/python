@@ -2,4 +2,12 @@
   net start mysql
   net stop mysql
 2.进入mysql
-  mysql -uroot 
+  mysql -hlocalhost -uroot -p
+  密码 123456
+3.相关操作
+  create database name; 创建数据库
+  show databases; 展示所有的数据库
+  use databasename; 使用某个数据库
+  show tables;  展示所有表格
+  desc tablename; 展示某个表格
+  
