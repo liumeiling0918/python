@@ -1,0 +1,5 @@
+1.开启或者关闭
+  net start mysql
+  net stop mysql
+2.进入mysql
+  mysql -uroot 
