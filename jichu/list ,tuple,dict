@@ -33,6 +33,13 @@ dict 优点：二分查找去查询
   values() 返回所有的values 例如dict_values(['male', 18, 'jin'])
   items() 返回所有的items  例如dict_items([('sex', 'male'), ('age', 18), ('name', 'jin')])
   a,b = b,a 交换a,b的值
+ fromkeys(seq,value)用法
+#说明：用于创建一个新字典，以序列seq中元素做字典的键，value为字典所有键对应的初始值
+
+dic = dict.fromkeys([1,2,3],'春哥') {1: '春哥', 2: '春哥', 3: '春哥'}
+dic = dict.fromkeys([1,2,3],[])  # {1: [], 2: [], 3: []}
+dic[1].append('袁')     {1: ['袁'], 2: ['袁'], 3: ['袁']}
+dic[2].extend('二哥')   {1: ['袁', '二', '哥'], 2: ['袁', '二', '哥'], 3: ['袁', '二', '哥']}
 查
 dic.keys()
 dic.values()
