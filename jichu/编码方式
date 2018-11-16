@@ -1,0 +1,25 @@
+1.unicode 英文4字节 中文4字节
+2.ascII 英文1字节
+3.utf-8 英文1字节 中文3字节
+4.gbk  英文1字节 中文2字节
+1，各个编码之间的二进制，是不能互相识别的，会产生乱码。
+2，文件的储存（硬盘），传输，不能是unicode（只能是utf-8 utf-16 gbk,gb2312,asciid等）
+
+py3:
+    str 在内存中是用unicode编码。所以储存（硬盘），传输需要转码。（unicode存储空间太大）
+        bytes类型编码方式：utf-8,gbk,gb2312,ascII,可以直接用来存储和传输
+        str需要转换成bytes,然后进行存储，传输
+        对于英文：
+             str  ：表现形式：s = 'alex'
+                    编码方式： 010101010  unicode
+            bytes ：表现形式：s = b'alex'
+                    编码方式： 000101010  utf-8 gbk。。。。
+
+        对于中文：
+             str  ：表现形式：s = '中国'
+                    编码方式： 010101010  unicode
+            bytes ：表现形式：s = b'x\e91\e91\e01\e21\e31\e32' 十六进制
+                    编码方式： 000101010  utf-8 gbk。。。。
+ str: s1='safa'
+ bytes: s2=b'dsa'
+转码：s3=s1.encode('utf-8')
