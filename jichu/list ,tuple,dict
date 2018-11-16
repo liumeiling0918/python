@@ -9,7 +9,7 @@ extend 将元素分下来添加在末尾位置
       range(n) 默认从0开始，0~n-1
  元祖：
       count()
-      len()
+      len(truple)
       li.index('元素')
       sort（reverse = True）
       li.sort()
@@ -33,3 +33,10 @@ dict 优点：二分查找去查询
   values() 返回所有的values 例如dict_values(['male', 18, 'jin'])
   items() 返回所有的items  例如dict_items([('sex', 'male'), ('age', 18), ('name', 'jin')])
   a,b = b,a 交换a,b的值
+查
+dic.keys()
+dic.values()
+dic.items()
+for k,v in dic.items():
+    print(k,v)
+dic.get(key,None)
