@@ -47,3 +47,10 @@ dic.items()
 for k,v in dic.items():
     print(k,v)
 dic.get(key,None)
+对于enumerate(li,start) 返回的值为 index，元素
+例如：li = ['alex','taibai','wusir','egon']
+      for index,i in enumerate(li,0):
+      print(index,i)
+      结果 0 alex
+          1  taibai
+          ...
