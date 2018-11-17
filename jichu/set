@@ -1,0 +1,28 @@
+1.定义集合
+  set1={1,2,3} 或者
+  list1=[1,2,3]  set1=set(list1)
+2.添加元素
+  set1.add(内容) 添加一个元素
+  set1.update(内容) 可以添加多个元素，参数可以为列表，元素，字典
+3.删除元素
+  set1.pop()  # 随机删除
+  set1.remove(内容) 按元素删除
+4.删除集合
+  set1.clear()
+  del set1
+5.集合的相关操作
+  # set1 = {1,2,3,4,5}
+  # set2 = {4,5,6,7,8}
+  交集：set1 & set2          # {4, 5}
+       set1.intersection(set2)
+  并集：set1|set2
+        set1.union(set2) {1,2,3,4,5,6,7,8}
+  异或:set1 ^ set2  # {1, 2, 3, 6, 7, 8}
+       set1.symmetric_difference(set2))  # {1, 2, 3, 6, 7, 8}
+  差集：set1独有的
+        set1-set2
+        set1.difference(set2)
+  是否为子集：set1.issubset(set2) 或者 set1<set2
+  是否为超集:set2.issuperset(set1) 或者 set1>set2
+  
+  
