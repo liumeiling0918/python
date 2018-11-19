@@ -5,3 +5,4 @@
 4.# line = f.readline()  # 一行一行的读
   # line = f.readlines()  # 每一行当成列表中的一个元素，添加到list中
   
+5.读写权限：http://www.runoob.com/python/file-methods.html
