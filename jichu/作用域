@@ -31,9 +31,9 @@ def outer():
     a = 1
     def inner():
         print(a)
-    return inner
+    return inner #返回内部函数地址
 # 调用内部函数
-# inn = outer()
+# inn = outer()#返回内部函数地址
 # print(inn())
 #等同于 print(outer()())
 4.闭包
@@ -42,4 +42,7 @@ def outer():
 #     a = 1
 #     def inner():
 #         print(a)
-#     inner()
+      print(inner.__closure__)
+#     return inner
+
+使用__closure__判断是否闭包
