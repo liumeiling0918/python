@@ -1,0 +1,39 @@
+1.全局变量：
+  在函数外声明或者加global
+  # a = 1
+# def func():
+#     global a
+#     a = 2
+# func()
+# print(a)
+结果为2
+2.global() 以字典的形式返回当前位置的全局变量
+  locals()以dict类型返回当前位置的全部局部变量
+3.#nonlocal 只能用于局部变量 找上层中离当前函数最近一层的局部变量
+#声明了nonlocal的内部函数的变量修改会影响到 离当前函数最近一层的局部变量
+# a = 1
+# def outer():
+#     a = 1
+#     def inner():
+#         a = 2
+#         def inner2():
+#             nonlocal a  #声明了一个上面第一层局部变量
+#             a += 1   #不可变数据类型的修改
+#         inner2()
+#         print('##a## : ', a)
+#     inner()
+#     print('**a** : ',a)
+
+# outer()
+# print('全局 ：',a)
+4.全局函数与局部函数
+def outer():
+    a = 1
+    def inner():
+        print(a)
+    return inner
+# 调用内部函数
+# inn = outer()
+# print(inn())
+#等同于 print(outer()())
+
