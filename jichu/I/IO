@@ -6,3 +6,17 @@
   # line = f.readlines()  # 每一行当成列表中的一个元素，添加到list中
   
 5.读写权限：http://www.runoob.com/python/file-methods.html
+读
+            # read 一次性读 尽可能读多的字节，内容太多会溢出
+            # readlines 一次性读
+            # readline 一行一行读
+                #不知道在哪儿结束
+                #视频 图片 rb bytes 按照字节读
+            # for循环 —— 最好！！！一行一行的读
+ with open('D:\python',encoding='utf-8') as f:
+    for line in f:
+        print(line)
+    # 光标 —— 文件指针
+     #seek _ 指定光标移动到某个位置
+     #tell _ 获取光标当前的位置
+     #truncate _ 截取文件
