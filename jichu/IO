@@ -1,0 +1,22 @@
+1.read(count) 该方法从文件的开头开始读入，如果没有传入count，它会尝试尽可能多地读取更多的内容，很可能是直到文件的末尾。
+2.tell()方法告诉你文件内的当前位置, 换句话说，下一次的读写会发生在文件开头这么多字节之后。
+3.seek（offset [,from]）方法改变当前文件的位置。Offset变量表示要移动的字节数。From变量指定开始移动字节的参考位置。
+如果from被设为0，这意味着将文件的开头作为移动字节的参考位置。如果设为1，则使用当前的位置作为参考位置。如果它被设为2，那么该文件的末尾将作为参考位置。
+4.# line = f.readline()  # 一行一行的读
+  # line = f.readlines()  # 每一行当成列表中的一个元素，添加到list中
+  
+5.读写权限：http://www.runoob.com/python/file-methods.html
+读
+            # read 一次性读 尽可能读多的字节，内容太多会溢出
+            # readlines 一次性读
+            # readline 一行一行读
+                #不知道在哪儿结束
+                #视频 图片 rb bytes 按照字节读
+            # for循环 —— 最好！！！一行一行的读
+ with open('D:\python',encoding='utf-8') as f:
+    for line in f:
+        print(line)
+    # 光标 —— 文件指针
+     #seek _ 指定光标移动到某个位置
+     #tell _ 获取光标当前的位置
+     #truncate _ 截取文件
