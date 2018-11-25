@@ -1,3 +1,6 @@
+博客地址： https://www.cnblogs.com/liwenzhou/p/7988087.html
+
+1.完整的html页面:
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -23,7 +26,7 @@
     
     <!--引入外部css样式表
     REL属性用于定义连接的文件和HTML文档之间的关系。StyleSheet，的意思就是样式调用，
-    REL=StyleSheet指定一个固定或首选的样式而
+    REL=StyleSheet指定一个固定或首选的样式
     REL="Alternate StyleSheet"定义一个交互样式。-->
     <link rel="stylesheet" href="test.css">
     
@@ -44,3 +47,59 @@
 <div style="height: 1000px;background-color: red"></div>
 </body>
 </html>
+2.相关标签意义
+每个标签的id的属性都唯一，可以省略
+b 加粗
+i 斜体
+u底部下划线
+s 文字上的下划线（表示删除）
+br换行
+hr 水平线
+&nbsp 空格
+&copy 版权标识
+&reg注册标识
+&gt 大于
+&lt 小于
+3.相关操作:
+多行修改：选中一行按alt 选择下一行 按alt选择下一行。。。然后修改
+h1*5>a.cl 按住Tab 
+效果：
+<h1><a href="" class="cl"></a></h1>
+<h1><a href="" class="cl"></a></h1>
+<h1><a href="" class="cl"></a></h1>
+<h1><a href="" class="cl"></a></h1>
+<h1><a href="" class="cl"></a></h1>
+4.列表：
+有序列表：ol 属性 li: 列表内容  type：显示序号的形式A，a,1,罗马字符 start="3" 序号的开始
+无序列表: ul  属性 li: 列表内容  type：无序列表的显示形式 squre,cycle等
+标题列表: 
+<dl>
+  <dt>标题1</dt>
+  <dd>内容1</dd>
+  <dt>标题2</dt>
+  <dd>内容1</dd>
+  <dd>内容2</dd>
+</dl>
+5.表格
+<!--cellpadding 内边距 cellspacing外边距  rowspan: 单元格竖跨多少行
+colspan: 单元格横跨多少列（即合并单元格）-->
+<table border="1" cellpadding="10" cellspacing="10">
+    <thead>
+    <tr>
+        <th>姓名</th>
+        <th>年龄</th>
+        <th>爱好</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td colspan="2">小强</td>
+        <td rowspan="2">戴帽子</td>
+    </tr>
+    <tr>
+        <td>射哥</td>
+        <td>18</td>
+    </tr>
+    </tbody>
+</table>
+	
