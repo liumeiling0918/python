@@ -68,11 +68,11 @@ id选择器 #i1{color:red;}  <p id="i1"></p>
       <!--属性选择器-->
       <p s1="1">第一个p</p>
       <p s1="2">第二个p</p>
-      p[s1]{
+      [s1]{
           color: green;
       }
       结果：两个p均变成绿色
-      p[s1="2"]{
+      [s1="2"]{
           color: green;
       }
       结果:只有第二个p变成green
