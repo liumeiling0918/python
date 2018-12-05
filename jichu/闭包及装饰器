@@ -8,9 +8,9 @@ def outter():
             i()
  2.装饰器:
 def timmer(f):    #装饰器函数
-    def inner():
+    def inner(*args,**kwargs):
         start = time.time()
-        ret = f()       #被装饰的函数
+        ret = f(*args,**kwargs)       #被装饰的函数
         end = time.time()
         print(end - start)
         return ret
