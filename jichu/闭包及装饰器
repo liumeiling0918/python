@@ -1,0 +1,27 @@
+1.闭包：内部函数使用外部函数的变量
+def outter():
+  a=3
+  def inner():
+    print(a)
+  return inner
+  调用方式：i=outer()
+            i()
+ 2.装饰器:
+def timmer(f):    #装饰器函数
+    def inner():
+        start = time.time()
+        ret = f()       #被装饰的函数
+        end = time.time()
+        print(end - start)
+        return ret
+    return inner
+
+@timmer         #语法糖 @装饰器函数名
+def func():     #被装饰的函数
+    time.sleep(0.01)
+    print('老板好同事好大家好')
+    return '新年好'
+    相当于：
+func = timmer(func)
+func()   #inner()
+
