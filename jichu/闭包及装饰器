@@ -25,3 +25,36 @@ def func():     #被装饰的函数
 func = timmer(func)
 func()   #inner()
 
+3.
+# def wahaha():
+#     '''
+#     一个打印娃哈哈的函数
+#     :return:
+#     '''
+#     print('娃哈哈')
+
+# print(wahaha.__name__) #查看字符串格式的函数名
+# print(wahaha.__doc__)  #document中的注释内容
+1.在inner上添加@wraps(func)
+from functools import wraps
+def wrapper(func):  #func = holiday
+    @wraps(func)
+    def inner(*args,**kwargs):
+        print('在被装饰的函数执行之前做的事')
+        ret = func(*args,**kwargs)
+        print('在被装饰的函数执行之后做的事')
+        return ret
+    return inner
+
+@wrapper   #holiday = wrapper(holiday)
+def holiday(day):
+    '''这是一个放假通知'''
+    print('全体放假%s天'%day)
+    return '好开心'
+
+print(holiday.__name__) 结果为holiday
+2.在inner上未添加@wraps(func)
+print(holiday.__name__) 结果为inner
+
+
+
