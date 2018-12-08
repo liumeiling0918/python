@@ -1,15 +1,15 @@
 1. CSS如何引入?
 			1. 直接写在标签里面 style="样式1;样式2;"
-        <p style="color:red"></p>
+       				 <p style="color:red"></p>
 			2. 在head中通过style标签定义
-        <style>
-        p{
-        color:red;
-        }
-        </style>
-        等价于外联样式表中的标签选择器
+				<style>
+				p{
+				color:red;
+				}
+				</style>
+        			等价于外联样式表中的标签选择器
 			3. 把样式单独写在css文件中,然后在html文件中通过link标签导入
-       <link rel="stylesheet" href="index.css">
+       				<link rel="stylesheet" href="index.css">
  2.css基本选择器：
 标签选择器 p{color:red;}
 id选择器 #i1{color:red;}  <p id="i1"></p>
@@ -31,6 +31,9 @@ id选择器 #i1{color:red;}  <p id="i1"></p>
       结果：第一层，第二层都变色
 
      3.2 儿子选择器：> 
+      #id3>p{
+          color: pink;
+      }
       <!--儿子选择器-->
       <div id="id3">
           <p>你好，我是第一层div的p</p>
@@ -38,31 +41,30 @@ id选择器 #i1{color:red;}  <p id="i1"></p>
               <p>你好，我是第二层div的p</p>
           </div>
       </div>
-      #id3>p{
-          color: pink;
-      }
+     
       结果:第一层变色
 
       3.3毗邻选择器：+
+       #id4+p{
+          color:red;
+      }
       <!--毗邻选择器-->
       <p>div的上面</p>
       <div id="id4">div效果</div>
       <p>div的下面</p>
-      #id4+p{
-          color:red;
-      }
+     
       结果；只有div的下面变色
       
       3.4弟弟选择器：~
+       #id5~p{
+          color:red;
+      }
       <!--弟弟选择器-->
       <p>div的上面</p>
       <div id="id5">div效果</div>
       <p>div的下面1</p>
       <p>div的下面2</p>
-      #id5~p{
-          color:red;
-      }
-      结果:div的下面1,div的下面1变成红色
+      结果:div的下面1，div的下面2 变成红色
 
       3.5属性选择器：
       <!--属性选择器-->
