@@ -71,7 +71,7 @@ h1*5>a.cl 按住Tab
 <h1><a href="" class="cl"></a></h1>
 4.列表：
 有序列表：ol 属性 li: 列表内容  type：显示序号的形式A，a,1,罗马字符 start="3" 序号的开始
-无序列表: ul  属性 li: 列表内容  type：无序列表的显示形式 squre,cycle等
+无序列表: ul  属性 li: 列表内容  type：无序列表的显示形式 square,cycle,disc等
 标题列表: 
 <dl>
   <dt>标题1</dt>
@@ -107,6 +107,15 @@ form的相关属性：
 html中涉及到上传文件使用enctype="multipart/form-data"	
 autocomplete 自动补全，输入过的内容会自动记录下来
 input type=text时：
-使用value设置默认值 使用placeholder设置的值，获取光标时文本框内容为空
+使用value设置默认值 使用placeholder为占位符 ，它所设置的值，获取光标时文本框内容为空
 disabled 禁用
 select下拉框中: mutiple：可多选的下拉框	
+ <select name="from2" id="s2">
+        <optgroup label="北京">
+            <option value="cp">昌平</option>
+            <option value="cy">朝阳</option>
+            <option value="hd">海淀</option>
+            <option value="ft">丰台</option>
+        </optgroup>
+  </select>
+    optgroup分组下拉框
