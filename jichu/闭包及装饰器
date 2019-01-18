@@ -131,3 +131,27 @@ func()   #inner()
     wrapper1 ,after func
     wrapper2 ,after func
     wrapper3 ,after func
+  6.三层装饰器
+  装饰器的最外面一层传递符号变量
+  def outter(flag):
+    def timer(func):
+        def inner(*args,**kargs):
+            if flag:
+                print("before")
+                ret=func(*args,**kargs)
+                print('end')
+                return ret
+            else:
+                ret=func(*args,**kargs)
+                return ret
+        return inner
+    return timer
+
+@outter(True)
+def func(a,b):
+    print(a)
+    print(b)
+
+print(func(2,3))
+
+  
