@@ -31,3 +31,6 @@ captlze首字母大写
 
       for i in 可迭代对象：
         pass
+      字符串中含有某个元素的个数：
+      str.count('e') #字符串str中含有字母e的个数
+      
