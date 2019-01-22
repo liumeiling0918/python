@@ -46,6 +46,8 @@ dic.values()
 dic.items()
 for k,v in dic.items():
     print(k,v)
+for k in dict:
+      print(k) #返回的是key值
 dic.get(key,None)
 对于enumerate(li,start) 返回的值为 index，元素
 例如：li = ['alex','taibai','wusir','egon']
