@@ -1,0 +1,91 @@
+1.locals()返回所有的本地作用域的变量名称
+  globals()返回所有的全局作用域的变量名称
+  
+2.global 修饰全局变量
+# nonlocal 变量 :这是一个函数里面再嵌套了一个函数。当使用 nonlocal 时，就声明了该变量不只在嵌套函数inner（）里面才有效， 而是在整个大函数里面都有效
+
+3.# 迭代器 = iter(可迭代的) 等同于  迭代器 = 可迭代的.__iter__()
+ #迭代器.__next__()  等同于  next(迭代器)
+
+4.dir(数据类型或变量) 查看其拥有的内置方法
+
+5.callable() 是否是可调用的方法
+ 
+6.import time等同于__import__('time')
+
+7.writable()是否可写  
+  readable() 是否可读
+ 
+8.hash()求可哈希对象的地址  元祖，字符串，基本数据类型可哈希。列表，字典，集合不可哈希
+  #hash - 对于相同的可hash数据的hash值在一次程序的执行过程中总是不变的
+  # 例如 print(hash('abc'))与print(hash('abc'))均相同
+  # 字典的寻址方式  key对应的hash值就是value的内存的地址
+  
+ 9.id(对象) 返回对象的地址
+   type(对象)返回对象的数据类型
+   
+ 10.print()
+     重定向输出流: 例如输出到文件中
+     # f = open('file','w')
+     # print('aaaa',file=f)
+     # f.close()
+     指定输出的结束符， 若不指定end则默认为回车
+     print('我们的祖国是花园',end='')  #指定输出的结束符
+      print('我们的祖国是花园',end='')
+      # 若不指定end则默认为回车
+      print('我们的祖国是花园')
+      print('我们的祖国是花园')
+      #指定输出多个值之间的分隔符
+      print(1,2,3,4,5,sep='|') 
+      是否需要缓存
+      print（s,flush=True）不做缓存，立即把内容输出到流文件中，有一个输出一个
+      print(s,flush=False)放入缓存中，累积一堆再取
+      例如进度条程序：
+      import time
+      def process():
+          for i in range(0,101,2):
+              time.sleep(0.1)
+              ret='\r %s%%:%s'%(i,i//2*'*') if i!=100 else '\r %s%%:%s 成功啦\n'%(i,i//2*'*')
+              print(ret,end='',flush=True)
+          其中字符串中的'\r'表示从行首开始
+          i//2表示对商取整，向下取整 为int型 -9//2=-5  9//2=4
+    11.# exec和eval都可以执行 字符串类型的代码
+      # eval有返回值  —— 有结果的简单计算
+      # exec没有返回值   —— 简单流程控制
+      # eval只能用在你明确知道你要执行的代码是什么
+      # exec('print(123)')
+      # eval('print(123)')
+      # print(eval('1+2+3+4'))   # 有返回值
+      # print(exec('1+2+3+4'))   #没有返回值
+      
+      # code = '''for i in range(10):
+      #     print(i*'*')
+      # '''
+      # exec(code)
+      
+   12.compile()编译
+    # code1 = 'for i in range(0,10): print (i)'
+    # compile1 = compile(code1,'','exec')
+    # exec(compile1)
+
+    # code2 = '1 + 2 + 3 + 4'
+    # compile2 = compile(code2,'','eval')
+    # print(eval(compile2))
+
+    # code3 = 'name = input("please input your name:")'
+    # compile3 = compile(code3,'','single')
+    # exec(compile3) #执行时显示交互命令，提示输入
+    # print(name)
+    12.关于数：
+    bin()转化成二进制
+    oct()转化成八进制
+    hex()转化成十六进制
+    abs()绝对值
+    divmod(7,2)   # div除法 mod取余 除余
+    pow(a,b)幂运算
+    pow(a,b,c)幂运算后取余
+    sum(列表，start) 从start开始加
+    min()取最小值
+    max()取最大值
+    
+      
