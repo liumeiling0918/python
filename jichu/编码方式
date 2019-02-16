@@ -28,6 +28,11 @@ py3:
 而str.decode是将字节流str按给定的解码方式解码，并转换成utf-8形式，u.encode是将unicode类按给定的编码方式转换成字节流str
 注意调用encode方法的是unicode对象生成的是字节流，调用decode方法的是str对象（字节流）生成的是unicode对象，若str对象调用encode会默认先按系统默认编码方式decode成unicode对象再encode，忽视了中间默认的decode往往导致报错
 自己写代码时只需记住str字节流调用decode，unicode对象调用
+例如bytes('你好',encoding='utf-8') 首先按照系统默认方式解码成unicode,然后再以utf-8将unicode编码
+查看系统的默认编码方式
+import sys
+print(sys.getdefaultencoding())
+
 
 2.首先要搞清楚，字符串在Python内部的表示是unicode编码，因此，在做编码转换时，通常需要以unicode作为中间编码，即先将其他编码的字符串解码（decode）成unicode，再从unicode编码（encode）成另一种编码。
 decode的作用是将其他编码的字符串转换成unicode编码，如str1.decode('gb2312')，表示将gb2312编码的字符串转换成unicode编码。
