@@ -23,3 +23,8 @@ py3:
  str: s1='safa'
  bytes: s2=b'dsa'
 转码：s3=s1.encode('utf-8')
+注意：
+在python中，编码解码其实是不同编码系统间的转换，默认情况下，转换目标是Unicode，即编码unicode→str，解码str→unicode，其中str指的是字节流
+而str.decode是将字节流str按给定的解码方式解码，并转换成utf-8形式，u.encode是将unicode类按给定的编码方式转换成字节流str
+注意调用encode方法的是unicode对象生成的是字节流，调用decode方法的是str对象（字节流）生成的是unicode对象，若str对象调用encode会默认先按系统默认编码方式decode成unicode对象再encode，忽视了中间默认的decode往往导致报错
+自己写代码时只需记住str字节流调用decode，unicode对象调用
