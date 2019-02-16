@@ -77,15 +77,36 @@
     # exec(compile3) #执行时显示交互命令，提示输入
     # print(name)
     12.关于数：
-    bin()转化成二进制
-    oct()转化成八进制
-    hex()转化成十六进制
-    abs()绝对值
-    divmod(7,2)   # div除法 mod取余 除余
-    pow(a,b)幂运算
-    pow(a,b,c)幂运算后取余
-    sum(列表，start) 从start开始加
-    min()取最小值
-    max()取最大值
-    
-      
+          bin()转化成二进制
+          oct()转化成八进制
+          hex()转化成十六进制
+          abs()绝对值
+          divmod(7,2)   # div除法 mod取余 除余
+          pow(a,b)幂运算
+          pow(a,b,c)幂运算后取余
+          sum(列表，start) 从start开始加
+          min()取最小值
+          max()取最大值
+ 13.bytes() 与bytearray()
+        bytes('你好'，encoding='utf-8')  b'\xe4\xbd\xa0\xe5\xa5\xbd' 以一个整体在内存中存放
+        ba=bytearray('你好',encoding='utf-8') bytearray(b'\xe4\xbd\xa0\xe5\xa5\xbd') 
+        ba[0]为\xe4 编码的每个部分在内存中分开存放 可以对其中任意一个进行修改
+14.chr(number),unichr(number),ord(str)
+          chr(number)将数字以ACSii形式转译
+          unichar(number)将数字以unicode形式转译
+          ord(str)将字符串按照对应的ACSii形式或者unicode形式进行转换成数字
+          chr(65) ‘A’
+          unichr(12345) u'\u3039'
+          ord('a') 97
+          ord(u'\u3039') 12345
+15.repr()按照原型显示
+           print('1')   1
+           # print(repr('1')) '1'
+          # print(repr(1))  1
+          # name = 'egg'
+          # print('你好%s'%name)  你好egg
+          # print('你好%r'%name)  你好'egg'
+          %r内部调用了repr
+ 
+  
+  
