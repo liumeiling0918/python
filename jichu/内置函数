@@ -107,6 +107,98 @@
           # print('你好%s'%name)  你好egg
           # print('你好%r'%name)  你好'egg'
           %r内部调用了repr
+ 16.reversed(可迭代参数) 返回一个迭代器
+                  # l = [1,2,3,4,5]
+                  # l2 = reversed(l)
+                  # 保留原列表，返回一个反向的迭代器
+                  l.reverse() 在原列表的基础上进行修改
+   format() 格式化
+                # print(format('test', '<20')) 一共20个字符的空间 向左对齐
+                # print(format('test', '>40'))  向右对齐
+                # print(format('test', '^40'))  居中对齐
+   all(可迭代) 可迭代中的所有元素为True才为True
+   any(可迭代) 可迭代中的任意一个元素为True则为True
+               # print(all(['a','',123])) False
+                # print(all(['a',123]))  True
+                # print(any(['',True,0,[]])) True
+
+ 17.zip(可迭代1，可迭代2，，，)将可迭代参数中的内容按照拉链式的方法压缩成一个迭代器返回
+                  # l = [1,2,3,4,5]
+                  # l2 = ['a','b','c','d']
+                  # l3 = ('*','**',[1,2])
+                  # d = {'k1':1,'k2':2,'k3':3}
+                  # for i in zip(l,l2):
+                  #     print(i)
+                  # 结果为：
+                  # (1, 'a')
+                  # (2, 'b')
+                  # (3, 'c')
+                  # (4, 'd')
+
+                  # for i in zip(l,l2,l3):
+                  #     print(i)
+                  # 结果为：
+                  # (1, 'a', '*')
+                  # (2, 'b', '**')
+                  # (3, 'c', [1, 2])
+
+                  # for i in zip(l,l2,l3,d):
+                  #     print(i)
+                  # 结果为：
+                  # (1, 'a', '*', 'k1')
+                  # (2, 'b', '**', 'k2')
+                  # (3, 'c', [1, 2], 'k3')
  
-  
+ 
+ 18.带有可迭代参数的函数：
+ filter(函数,可迭代参数)
+ map(函数,可迭代参数)
+ sorted(可迭代参数，key=函数，reversed=True/False)
+ max(可迭代参数，key=函数)
+ min(可迭代参数，key=函数)
+ filter(函数,可迭代参数)结果返回迭代器
+             将可迭代的参数中的每个元素放入函数中运行，若函数的运行结果为True,则该元素为迭代器的成员之一。
+             例如# def is_odd(x):
+            #     return x % 2 == 1
+            # ret = filter(is_odd, [1, 4, 6, 7, 9, 12, 17])  返回的是迭代器
+            # 以上语句等价于[i for i in [1, 4, 6, 7, 9, 12, 17] if i % 2 == 1]
+ map(函数,可迭代参数) 结果返回迭代器
+            将可迭代的参数中的每个元素放入函数中运行，并将函数的运行结果放入迭代器中。
+            ret = map(abs,[1,-4,6,-8])
+          # 以上语句等价于[for i in [abs(i) for i in [1,-4,6,-8]]
+            for i in ret:
+              print(i)
+        # filter 执行了filter之后的结果集合 <= 执行之前的个数
+                #filter只管筛选，不会改变原来的值
+        # map 执行前后元素个数不变
+              # 值可能发生改变
+              
+ sorted(可迭代参数，key=函数，reversed=True/False)
+ sort(key=函数)
+ # sort是在原列表的基础上进行排序，sorted生成了一个新列表
+       例子：  # l = [1,-4,6,5,-10]
+              # # l.sort(key = abs)   # 在原列表的基础上进行排序
+              # print(sorted(l,key=abs,reverse=True))      # 生成了一个新列表 不改变原列表 占内存
+              # reverse=True从小到大排序，reverse=False从大到小进行排序
+      例子：# l = ['   ',[1,2],'hello world']
+             # new_l = sorted(l,key=len)
+    
+ max(可迭代参数，key=函数)
+       例子1：max([1,2,3,4,5,-6,-7],key=abs)
+       例子2：若可迭代参数是一个字典类型，那么传入函数的参数是字典的key
+            dic={'k1':10,'k2':100,'k3':30}
+          # print(max(dic,key=lambda key:dic[key]))
+          
+ min(可迭代参数，key=函数)
+ 
+ 19.匿名函数  lambda 参数：返回值
+       例子1：# add = lambda x,y:x+y
+             # print(add(1,2))
+       例子2：# ret = map(lambda x:x**2,[-1,2,-3,4])
+             # for i in ret:
+            #     print(i)
+       
+
+ 
+ 
   
