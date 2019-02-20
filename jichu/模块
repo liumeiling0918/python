@@ -167,5 +167,11 @@
 
         # d = defaultdict(lambda : 5) #lambda : 5 该lambda函数是无参数的函数，返回值为5
         # print(d['k'])
+        
+        Counter类的目的是用来跟踪值出现的次数。
+        它是一个无序的容器类型，以字典的键值对形式存储，其中元素作为key，其计数作为value。计数值可以是任意的Interger（包括0和负数）。
+        c = Counter('abcdeabcdabcaba')
+        print c
+        输出：Counter({'a': 5, 'b': 4, 'c': 3, 'd': 2, 'e': 1})
 
 
