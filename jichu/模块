@@ -1,1 +1,113 @@
+1.re模块：
+        findall,search,match,split,sub,subn,finditer
+        import re
+        # findall返回所有满足匹配条件的结果,放在列表里
+        # search #函数会在字符串内查找模式匹配,只要找到第一个匹配然后返回一个包含匹配信息的对象,
+        # 该对象可以通过调用group()方法得到匹配的字符串,如果字符串没有匹配，则返回None。
+        # match是从头开始匹配，如果正则规则从头开始可以匹配上，就返回一个变量。
+        # 匹配的内容需要用group才能显示;如果没匹配上，就返回None，调用group会报错
+
+        # findall(正则，字符串)返回所有满足匹配条件的结果,放在列表里
+        # ret = re.findall('[a-z]+', 'eva egon yuan')
+        # print(ret) #结果['eva', 'egon', 'yuan']
+
+        # 当正则中含有分组()时，findall会优先把匹配结果中的组里内容()返回,如果想要匹配结果,取消权限即可，使用?:取消
+        # ret = re.findall('www.(baidu|oldboy).com', 'www.oldboy.com')
+        # print(ret)  # ['oldboy']
+        # 有()时，这是因为findall会优先把匹配结果中的组里内容(baidu|oldboy)返回,如果想要匹配结果,取消权限即可，使用?:取消
+        # ret1 = re.findall('www.(baidu|oldboy).com', 'www1.oldboy.com')
+        # print(ret1) #[]因为不匹配
+
+        # search(正则，字符串) #函数会在字符串内查找模式匹配,只要找到第一个匹配然后返回一个包含匹配信息的对象,
+        # ret = re.search('a', 'eva egon yuan')
+        # print(ret)  结果为<_sre.SRE_Match object; span=(2, 3), match='a'>
+        # if ret:
+        #     print(ret.group()) 结果为a
+        # 从前往后，找到一个就返回,返回的变量需要调用group才能拿到结果
+        # 如果没有找到，那么返回None，调用group会报错
+
+        # 含有分组功能的search()
+        # import re
+        # ret = re.search('^[1-9](\d{14})(\d{2}[0-9x])?$','110105199912122277')
+        # print(ret.group()) #结果为110105199912122277
+        # #取分组中的内容，第一组(\d{14}) 第二组(\d{2}[0-9x])
+        # print(ret.group(1)) #结果为10105199912122
+        # print(ret.group(2)) #结果为277
+
+        # 我们可以使用?P<name>对分组进行命名，使用?P=name通过分组名使用该分组
+        # ret = re.search("<(?P<tag_name>\w+)>\w+</(?P=tag_name)>","<h1>hello</h1>")
+        # #可以在分组中利用(?P<tag_name>)的形式给分组起名字 (?P=tag_name)使用分组的名字 用于匹配成对出现的形式
+        # ret = re.search("<(?P<tag_name>\w+)>\w+</(?P=tag_name)>","<h1>hello</h2>")
+        # print(ret) 结果为None
+        # #获取的匹配结果可以直接用group('名字')拿到对应的值
+        # print(ret.group('tag_name'))   #结果 ：h1
+        # print(ret.group())             #结果 ：<h1>hello</h1>
+
+
+        # #如果不给组起名字，也可以用\序号来找到对应的组，表示要找的内容和前面的组内容一致
+        # ret = re.search(r"<(\w+)>\w+</\1>","<h1>hello</h1>")
+        # \1用于取第一组分组
+        # #获取的匹配结果可以直接用group(序号)拿到对应的值
+        # print(ret.group(1))
+        # print(ret.group())  #结果 ：<h1>hello</h1>
+
+
+
+        # match(正则，字符串) 是从头开始匹配，如果正则规则从头开始可以匹配上，就返回一个变量。
+        # 匹配的内容需要用group才能显示;如果没匹配上，就返回None，调用group会报错
+        # 与search的区别是：search只要匹配上就行，不需要必须从字符串的头部匹配
+        # 例如ret = re.match('a', 'abc').group()
+        #     print(ret)结果 : 'a'
+        # 例如re.match(' [a-z]+', 'eva egon yuan') None('eva egon yuan'开头没有空格，所以返回None)
+        #     re.search(' [a-z]+', 'eva egon yuan') 空格egon空格yuan
+
+        # 含有分组功能的match()与含有分组功能的search（）类似
+        # import re
+        # ret = re.match('^[1-9](\d{14})(\d{2}[0-9x])?$','110105199912122277')
+        # print(ret.group()) #结果为110105199912122277
+        # #取分组中的内容，第一组(\d{14}) 第二组(\d{2}[0-9x])
+        # print(ret.group(1)) #结果为10105199912122
+        # print(ret.group(2)) #结果为277
+
+
+
+        # split(正则,字符串) 是按照正则所匹配的规则对字符串进行分割
+        # ret = re.split('[ab]', 'abcd')
+        # # 先按'a'分割得到''和'bcd',在对''和'bcd'分别按'b'分割
+        # print(ret)  # ['', '', 'cd']
+
+        # 没有分组()时，不保留匹配的项
+        # ret=re.split("\d+","eva3egon4yuan")
+        # print(ret) #结果 ： ['eva', 'egon', 'yuan']
+        # 有分组()时，保留了匹配的项
+        # ret=re.split("(\d+)","eva3egon4yuan")
+        # print(ret) #结果 ： ['eva', '3', 'egon', '4', 'yuan']
+
+        # sub(正则，替换后的内容，字符串，替换次数)将字符串中匹配的内容替换，并限定替换次数。返回值为替换后的字符串
+        # ret = re.sub('\d', 'H', 'eva3egon4yuan4',1)
+        # # 将数字替换成'H'，参数1表示只替换1个
+        # print(ret) #evaHegon4yuan4
+
+        # subn(正则，替换后的内容，字符串)将字符串中匹配的内容替换。返回值为元祖，（替换后的字符串，替换次数）
+        # ret = re.subn('\d', 'H', 'eva3egon4yuan4')
+        #将数字替换成'H'，返回元组(替换的结果,替换了多少次)
+        # print(ret) 结果('evaHegonHyuanH', 3)
+
+        # compile(正则)将正则表达式编译成为一个 正则表达式对象，该对象含有的函数match,search,findall
+        # obj = re.compile('\d{3}')
+        # #将正则表达式编译成为一个 正则表达式对象，规则要匹配的是3个数字
+        # ret = obj.search('abc123eeee') #正则表达式对象调用search，参数为待匹配的字符串
+        # print(ret.group()) #结果为123
+        # ret = obj.search('abcashgjgsdghkash456eeee3wr2') #正则表达式对象调用search，参数为待匹配的字符串
+        # print(ret.group())  #结果 ：456
+
+        #finditer返回一个存放匹配结果的迭代器,迭代器中的每个元素的内容需要用group查看
+        # import re
+        # ret = re.finditer('\d', 'ds3sy4784a')
+        # print(ret)  # <callable_iterator object at 0x10195f940>
+        # print(next(ret).group())  #查看第一个结果
+        # print(next(ret).group())  #查看第二个结果
+        # print([i.group() for i in ret])  #查看剩余的左右结果
+        # for i in ret:
+        #     print(i.group())
 
