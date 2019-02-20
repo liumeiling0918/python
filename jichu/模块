@@ -129,7 +129,8 @@
         # 队列：
         # import queue
         # q = queue.Queue()
-        # q.put([1,2,3]) #入队 def put(self, item, block=True, timeout=None) 不支持动态参数，不可以添加多个元素(*args)，可以添加多种数据类型,所以[1,2,3]是一个整体
+        # q.put([1,2,3]) #入队 def put(self, item, block=True, timeout=None) 不支持动态参数，不可以添加多个元素(*args)，
+        可以添加多种数据类型,所以[1,2,3]是一个整体
         # q.put(4)
         # print(q.get())#出队[1, 2, 3]
         # print(q.get() ) 4
