@@ -161,13 +161,14 @@
         # for k in od:
         #     print(k)
 
+       # 对于defaultdict(参数) 设置字典的默认value类型，参数必须是可调用类型。即callable(参数)=True
         # md=defaultdict(list) 表示字典md中的value默认为list
         # from collections import defaultdict
         # d1=defaultdict(list)
-        # print(d1['k'])  #对新创建的d1['k']默认value为list类型
-
+        # print(d1['k'])  #结果为[],对新创建的d1['k']默认value为list类型
         # d = defaultdict(lambda : 5) #lambda : 5 该lambda函数是无参数的函数，返回值为5
         # print(d['k'])
+
         
         Counter类的目的是用来跟踪值出现的次数。
         它是一个无序的容器类型，以字典的键值对形式存储，其中元素作为key，其计数作为value。计数值可以是任意的Interger（包括0和负数）。
