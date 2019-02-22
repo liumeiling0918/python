@@ -1,0 +1,40 @@
+import re
+from urllib.request import urlopen
+
+# url从网页上把代码爬下来
+def getPage(url):
+    response = urlopen(url)
+    return response.read().decode('utf-8')
+# 将读到的byte按照utf-8的形式解码成str
+
+def parsePage(s):
+    ret = re.finditer(
+        '<div class="item">.*?<div class="pic">.*?<em .*?>(?P<id>\d+).*?<span class="title">(?P<title>.*?)</span>'
+       '.*?<span class="rating_num" .*?>(?P<rating_num>.*?)</span>.*?<span>(?P<comment_num>.*?)评价</span>',s,re.S)
+    # ?P<名称>是对分组起的名称 re.S表示.可以匹配任意字符，包括换行符
+    for i in ret:
+        dic={'id':i.group('id'),'title':i.group('title'),'rating':i.group('rating_num'),'comment':i.group('comment_num')}
+        yield dic
+
+def main(num):
+    url = 'https://movie.douban.com/top250?start=%s&filter=' % num
+    response_html = getPage(url)
+    # print(response_html)
+    # response_html 为字符串
+    ret = parsePage(response_html)
+    # 爬取后的数据直接显示在窗口
+    for i in ret:
+        print(i)
+#     爬取的数据存放在文件中
+#     f=open('data','a',encoding='utf-8')
+#     f.write(ret)
+
+count = 0
+for i in range(10):   # 10页
+    main(count)
+    count += 25
+
+
+
+
+
