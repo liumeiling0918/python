@@ -299,3 +299,147 @@
         os.path.getatime(path)  返回path所指向的文件或者目录的最后访问时间 access
         os.path.getmtime(path)  返回path所指向的文件或者目录的最后修改时间 modify
         os.path.getsize(path) 返回path的大小
+        
+ 8.序列化模块
+ 序列化是指将数据结构转化成字符串
+ 反序列化是指将字符串转换成数据结构
+ 序列化的方式有 json pickle shelve
+ # json  # 数字 字符串 列表 字典 元组
+    # 通用的序列化格式
+    # 只有很少的一部分数据类型能够通过json转化成字符串
+# pickle
+    # 所有的python中的数据类型都可以转化成字符串形式
+    # pickle序列化的内容只有python能理解
+    # 且部分反序列化依赖python代码
+# shelve
+    # 序列化句柄
+    # 使用句柄直接操作，非常方便
+   # 数据存储
+# 网络上传输的时候
+
+# 从数据类型 --> 字符串的过程 序列化
+# 从字符串 --> 数据类型的过程 反序列化
+
+# json *****
+# pickle ****
+# shelve ***
+
+# json  # 数字 字符串 列表 字典 元组
+    # 通用的序列化格式
+    # 只有很少的一部分数据类型能够通过json转化成字符串
+# pickle # 数字 字符串 列表 字典 元组 集合等所有数据
+    # 所有的python中的数据类型都可以转化成字符串形式
+    # pickle序列化的内容只有python能理解
+    # 且部分反序列化依赖python代码
+# shelve
+    # 序列化句柄
+    # 使用句柄直接操作，非常方便
+
+
+        # json dumps dump序列化方法 loads load反序列化方法
+        # dumps(数据)将数据序列化成字符串
+        # loads(字符串) 将字符串反序列化成数据
+        # dump,load操作跟文件相关
+        # dump(数据，文件)将数据序列化成字符串，并写入文件中
+        # load(文件) 将文件中的数据读出，并反序列化成数据
+        # 例如dumps loads
+        # dic = {1:"a",2:'b'}
+        # print(type(dic),dic)
+        # import json
+        # str_d = json.dumps(dic)   # 序列化
+        # print(type(str_d),str_d)
+        # # '{"kkk":"v"}'
+        # dic_d = json.loads(str_d) # 反序列化
+        # print(type(dic_d),dic_d)
+
+        # 例如dump load方法
+        import json
+        # json dump load
+        # dic = {1:"a",2:'b'}
+        # f = open('fff','w',encoding='utf-8')
+        # json.dump(dic,f)
+        # f.close()
+        # f = open('fff')
+        # res = json.load(f)
+        # f.close()
+        # print(type(res),res)
+
+        import json
+        # json dump load 不可多次读多次写 只能一次读一次写
+        # 例如下面的程序报错
+        # dic = {1:"中国",2:'b'}
+        # f = open('fff','w',encoding='utf-8')
+        # json.dump(dic,f,ensure_ascii=False)
+        # json.dump(dic,f,ensure_ascii=False)
+        # f.close()
+        # f = open('fff',encoding='utf-8')
+        # res1 = json.load(f)
+        # res2 = json.load(f)
+        # f.close()
+        # print(type(res1),res1)
+        # print(type(res2),res2)
+
+        # 我们可以利用dumps，loads方法进行多次读，多次写
+        # json
+        # dumps {} -- > '{}\n'
+        # 一行一行的读
+        # '{}\n'
+        # '{}' loads
+        # l = [{'k':'111'},{'k2':'111'},{'k3':'111'}]
+        # f = open('file','w')
+        # import json
+        # for dic in l:
+        #     str_dic = json.dumps(dic)
+        #     f.write(str_dic+'\n')
+        # f.close()
+
+        # f = open('file')
+        # import json
+        # l = []
+        # for line in f:
+        #     dic = json.loads(line.strip())
+        #     l.append(dic)
+        # f.close()
+        # print(l)
+
+
+        import pickle
+        # dic = {'k1':'v1','k2':'v2','k3':'v3'}
+        # str_dic = pickle.dumps(dic)
+        # print(str_dic)  #一串二进制内容
+        #
+        # dic2 = pickle.loads(str_dic)
+        # print(dic2)    #字典
+
+
+        # pickle可以序列化所有的数据类型，包括集合
+        # pickle的dumps，dump，loads,load函数和json功能相同；但是pickle是将数据结构序列化成了byte类型
+        # 所以对于dump的文件必须以wb的方式写，对于load的文件必须以rb的方式读
+        # 此外，与json中的dump,load不同的是，pickle中的dump,load可多次写多次读
+        # import time
+        # struct_time1  = time.localtime(1000000000)
+        # struct_time2  = time.localtime(2000000000)
+        # f = open('pickle_file','wb')
+        # pickle.dump(struct_time1,f)
+        # pickle.dump(struct_time2,f)
+        # f.close()
+        # f = open('pickle_file','rb')
+        # struct_time1 = pickle.load(f)
+        # struct_time2 = pickle.load(f)
+        # print(struct_time1.tm_year)
+        # print(struct_time2.tm_year)
+        # f.close()
+
+        # shelve像字典一样直接对文件进行操作
+        # import shelve
+        # f = shelve.open('shelve_file')
+        # f['key'] = {'int':10, 'float':9.5, 'string':'Sample data'}  #直接对文件句柄操作，就可以存入数据
+        # f.close()
+        #
+        # import shelve
+        # f1 = shelve.open('shelve_file')
+        # existing = f1['key']  #取出数据的时候也只需要直接用key获取即可，但是如果key不存在会报错
+        # f1.close()
+        # print(existing)
+
+
