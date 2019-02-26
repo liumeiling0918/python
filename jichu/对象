@@ -1,0 +1,183 @@
+# 类名.__dict__ 查看类的所有属性，返回的是一个字典
+# 不可通过类名.__dict__ [key]=value 修改某个属性，即使该属性是静态属性
+# 只能通过类名.静态属性=新值
+#
+# 对象.__dict__ 查看对象的所有属性，返回的是一个字典
+# 可以通过对象.__dict__ [key]=value 修改某个对象属性
+# 例如：
+# class Course:
+#     language = 'Chinese'
+#     def __init__(self,teacher,course_name,period,price):
+#         self.teacher = teacher
+#         self.name = course_name
+#         self.period = period
+#         self.price = price
+#     def func(self):
+#         pass
+# Course.__dict__['language'] = 'English' #报错
+# print(Course.language)
+
+# python = Course('egon', 'python', '6 months', 20000)
+# linux = Course('oldboy', 'linux', '6 months', 20000)
+# python.__dict__['language']='English'
+# print(python.language)  English
+# print(linux.language)   Chinese
+
+# 类中的静态变量 可以被对象和类调用
+    # 对于静态变量是不可变数据类型来说(string等)，
+        # 类名.类变量=新值 该修改是共享的
+        #对象.类变量=新值  该修改是该对象独有的；对于其他对象来说，该类变量仍然是旧值
+
+    # 对于可变数据类型来说，使用对象名的修改是共享的，重新赋值是独立的
+# 例如： # 对于静态变量是不可变数据类型来说(string等)，
+# class Course:
+#     language = 'Chinese'
+#     def __init__(self,teacher,course_name,period,price):
+#         self.teacher = teacher
+#         self.name = course_name
+#         self.period = period
+#         self.price = price
+#     def func(self):
+#         pass
+#
+# python = Course('egon', 'python', '6 months', 20000)
+# linux = Course('oldboy', 'linux', '6 months', 20000)
+# python.language='English'
+# print(python.language)  #English
+# print(linux.language)   #Chinese
+
+# 对于可变数据类型来说，使用对象名的修改是共享的，重新赋值是独立的
+# class Course:
+#     language = ['Chinese']
+#     def __init__(self,teacher,course_name,period,price):
+#         self.teacher = teacher
+#         self.name = course_name
+#         self.period = period
+#         self.price = price
+#     def func(self):
+#         pass
+#
+# python = Course('egon','python','6 months',20000)
+# linux = Course('oldboy','linux','6 months',20000)
+# python.language[0]='English'  #这是修改操作 原来的language[0]='chinese' 现在的language[0]='English'
+# print(linux.language) #['English']
+# print(python.language) #['English']
+#
+# python.language='chinese'  #这是重新赋值操作，会创建新的属性language
+# print(linux.language) #['English']
+# print(python.language) #chinese
+
+# 例子：
+# 创建一个类，每实例化一个对象就计数
+# 最终所有的对象共享这个数据
+# class Foo:
+#     count = 0
+#     def __init__(self):
+#         Foo.count += 1
+#
+# f1 = Foo()
+# f2 = Foo()
+# print(f1.count) 2
+# print(f2.count) 2
+# f3 = Foo()
+# print(f1.count) 3
+
+# 组合：一个类的对象是另外一个类对象的属性
+# 例如：
+# class A:
+#     def __init__(self):
+#         self.name = 'egon'
+#
+# class B:
+#     def __init__(self,year,month,day):
+#         self.year = year
+#         self.month = month
+#         self.day = day
+#
+# b = B(18,1,17)
+# a = A()
+# a.birth = b #组合
+# print(a.birth) #<__main__.B object at 0x0352CDF0>
+# print(a.name) #egon
+# print(a.birth.day) #17
+
+# 继承 子类没有构造函数时，默认使用父类的构造函数
+# 例如：
+#     class Animal:
+#         def __init__(self,name,aggr,hp):
+#             self.name = name
+#             self.aggr = aggr
+#             self.hp = hp
+#             self.func()
+#         def func(self):
+#             print(123)
+#     #
+#     class Dog(Animal):
+#         def func(self):
+#             print(456)
+#         def bite(self,person):
+#             person.hp -= self.aggr
+#
+#     # d = Dog()  报错
+#     d=Dog('jid',3,4) #结果为456 因为func函数在子类中被重写
+
+
+
+# 父类中没有的属性 在子类中出现 叫做派生属性
+# 父类中没有的方法 在子类中出现 叫做派生方法
+# 只要是子类的对象调用，子类中有的名字 一定用子类的，子类中没有才找父类的，如果父类也没有报错
+# 如果父类 子类都有 用子类的(覆盖)
+    # 如果还想用父类的，单独调用父类的:
+    #       父类名.方法名 需要自己传self参数
+    #       super().方法名 不需要自己传self
+#例如# 派生
+# class Animal:
+#     def __init__(self,name,aggr,hp):
+#         self.name = name
+#         self.aggr = aggr
+#         self.hp = hp
+#
+#     def eat(self):
+#         print('吃药回血')
+#         self.hp+=100
+#
+# class Dog(Animal):
+#     def __init__(self,name,aggr,hp,kind):
+#         Animal.__init__(self,name,aggr,hp)  #等价于super.__init(name,aggr,hp)__
+#         self.kind = kind       # 派生属性
+#     def eat(self):
+#         Animal.eat(self)   # 如果既想实现新的功能也想使用父类原本的功能，还需要在子类中再调用父类
+#         self.teeth = 2
+#     def bite(self,person):   # 派生方法
+#         person.hp -= self.aggr
+# #
+# jin = Dog('金老板',100,500,'吉娃娃')
+# jin.eat() #吃药回血
+# print(jin.hp) #600
+# print(jin.teeth) #2
+#例如：
+# class Animal:
+#     def __init__(self,name,aggr,hp):
+#         self.name = name
+#         self.aggr = aggr
+#         self.hp = hp
+#     def eat(self):
+#         print('吃药回血')
+#         self.hp+=100
+#
+# class Dog(Animal):
+#     def __init__(self,name,aggr,hp,kind):
+#         super().__init__(name,aggr,hp)  # 只在新式类中有，python3中所有类都是新式类
+#         # super(子类，对象).__init__(name,aggr,hp)  即super(Dog，self).__init__(name,aggr,hp)
+#         # 等同于Animal.__init__(self,name,aggr,hp)
+#         self.kind = kind       # 派生属性
+#     def eat(self):
+#         # super().eat() #吃药回血
+#         print('dog eating')
+#
+# jin = Dog('金老板',200,500,'teddy')
+# print(jin.name) #金老板
+# jin.eat() #dog eating
+# super(Dog,jin).eat() #吃药回血
+
+
