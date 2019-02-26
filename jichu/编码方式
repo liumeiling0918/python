@@ -31,3 +31,8 @@ encode的作用是将unicode编码转换成其他编码的字符串，如str2.en
        
 解码：byte(gbk,gb2312,utf-8,asc)------> str(unicode)    
       网络传输，存储（硬盘）              内存中 
+# url从网页上把代码爬下来
+def getPage(url):
+    response = urlopen(url)
+    return response.read().decode('utf-8')
+# 将读到的byte按照utf-8的形式解码成str
