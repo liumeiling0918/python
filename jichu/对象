@@ -156,28 +156,152 @@
 # print(jin.hp) #600
 # print(jin.teeth) #2
 #例如：
-# class Animal:
-#     def __init__(self,name,aggr,hp):
-#         self.name = name
-#         self.aggr = aggr
-#         self.hp = hp
-#     def eat(self):
-#         print('吃药回血')
-#         self.hp+=100
-#
-# class Dog(Animal):
-#     def __init__(self,name,aggr,hp,kind):
-#         super().__init__(name,aggr,hp)  # 只在新式类中有，python3中所有类都是新式类
-#         # super(子类，对象).__init__(name,aggr,hp)  即super(Dog，self).__init__(name,aggr,hp)
-#         # 等同于Animal.__init__(self,name,aggr,hp)
-#         self.kind = kind       # 派生属性
-#     def eat(self):
-#         # super().eat() #吃药回血
-#         print('dog eating')
-#
-# jin = Dog('金老板',200,500,'teddy')
-# print(jin.name) #金老板
-# jin.eat() #dog eating
-# super(Dog,jin).eat() #吃药回血
+    # class Animal:
+    #     def __init__(self,name,aggr,hp):
+    #         self.name = name
+    #         self.aggr = aggr
+    #         self.hp = hp
+    #     def eat(self):
+    #         print('吃药回血')
+    #         self.hp+=100
+    #
+    # class Dog(Animal):
+    #     def __init__(self,name,aggr,hp,kind):
+    #         super().__init__(name,aggr,hp)  # 只在新式类中有，python3中所有类都是新式类
+    #         # super(子类，对象).__init__(name,aggr,hp)  即super(Dog，self).__init__(name,aggr,hp)
+    #         # 等同于Animal.__init__(self,name,aggr,hp)
+    #         self.kind = kind       # 派生属性
+    #     def eat(self):
+    #         # super().eat() #吃药回血
+    #         print('dog eating')
+    #
+    # jin = Dog('金老板',200,500,'teddy')
+    # print(jin.name) #金老板
+    # jin.eat() #dog eating
+    # super(Dog,jin).eat() #吃药回血
+
+接口类与抽象类
+接口类 metaclass=ABCMeta       抽象方法 @abstractmethod 支持多继承，接口类中的所有的方法都必须不能实现
+抽象类 metaclass=abc.ABCMeta   抽象方法 @abc.abstractmethod  不支持多继承，抽象类中方法可以有一些代码的实现
+例如接口类：
+        from abc import abstractmethod,ABCMeta
+        class Payment(metaclass=ABCMeta):  # 元类
+            # metaclass 指定元类 默认的元类 type
+            # 指定metaclass=ABCMeta 表示将要写的类是一个规范类
+            @abstractmethod
+            def pay(self,money):pass   # 没有实现这个方法
+
+        class Wechat(Payment):
+            def pay(self,money): #必须实现接口类中的抽象方法
+                print('已经用微信支付了%s元'%money)
+
+        class Alipay(Payment):
+            def pay(self,money):
+                print('已经用支付宝支付了%s元' % money)
+
+        class Applepay(Payment):
+            def pay(self,money):
+                print('已经用applepay支付了%s元' % money)
+        
+例如接口的多继承
+        from abc import abstractmethod,ABCMeta
+        class Swim_Animal(metaclass=ABCMeta):
+            @abstractmethod
+            def swim(self):
+                print('hrll')
+                pass
+
+        class Walk_Animal(metaclass=ABCMeta):
+            @abstractmethod
+            def walk(self):pass
+
+        class Fly_Animal(metaclass=ABCMeta):
+            @abstractmethod
+            def fly(self):pass
+
+        class Tiger(Walk_Animal,Swim_Animal):
+            def walk(self):
+                pass
+            def swim(self):
+                pass
+        class OldYing(Fly_Animal,Walk_Animal):pass
+        class Swan(Swim_Animal,Walk_Animal,Fly_Animal):pass
+        
+例如抽象类：
+        class All_file(metaclass=abc.ABCMeta):
+            all_type='file'
+            @abc.abstractmethod #定义抽象方法，无需实现功能
+            def read(self):
+                '子类必须定义读功能'
+                with open('filaname') as f:
+                    pass
+
+            @abc.abstractmethod #定义抽象方法，无需实现功能
+            def write(self):
+                '子类必须定义写功能'
+                pass
+
+        class Txt(All_file): #子类继承抽象类，但是必须定义read和write方法
+            def read(self):
+                print('文本数据的读取方法')
+            def write(self):
+                print('文本数据的读取方法')
+
+        class Sata(All_file): #子类继承抽象类，但是必须定义read和write方法
+            def read(self):
+                print('硬盘数据的读取方法')
+
+            def write(self):
+                print('硬盘数据的读取方法')
+                
+多态：父类引用指向子类对象
+# 什么是多态
+# python 动态强类型的语言
+# 鸭子类型:不崇尚根据继承所得来的相似;如果两个类刚好相似，并不产生父类的子类的兄弟关系，而是鸭子类型.
+# 例如list tuple 这种相似，是自己写代码的时候约束的，而不是通过父类约束的
+        class List():
+            def __len__(self):pass
+        class Tuple():
+            def __len__(self):pass
+        # 例如list和tuple相似，但是它们不是兄弟关系。通过len()函数可以求list,tuple的长度（鸭子类型，）
+        #在java中必须把list,tuple转换成同一个父类或者接口，才能通过len()同时对list,tuple进行操作(多态)
+        #所以java是强类型语言（多态），python是动态强类型语言（鸭子类型）
+        def len(obj):
+            return obj.__len__()
+            
+封装：# 狭义上的封装 —— 面向对象的三大特性之一
+     # 属性 和 方法都藏起来 不让你看见
+     # 所有的私有都是在变量的左边加上双下划綫
+    # 对象的私有属性
+    # 类中的私有方法
+    # 类中的静态私有属性
+    # 所有的私有的 都不能在类的外部直接使用
+    # 在类的外部使用私有：对象._类名__属性名
+    # 在类的内部使用私有：对象.__属性名（#会自动的带上_类名）
+    # 最好不要在类的外部使用私有
+    class Person:
+    __key = 123  # 私有静态属性
+    def __init__(self,name,passwd):
+        self.name = name
+        self.__passwd = passwd   # 私有属性
+
+    def __get_pwd(self):         # 私有方法
+        return self.__passwd
+
+    def login(self):          # 正常的方法调用私有的方法
+        self.__get_pwd()
+
+    alex = Person('alex','alex3714')
+    # print(alex.__passwd) 报错
+    print(alex._Person__passwd)  #'alex3714' # _类名__属性名
+    # print(alex.get_pwd()) 报错
+    print(alex._Person__get_pwd()) #'alex3714'
+    
+
+
+        
+ 
+
+
 
 
