@@ -139,7 +139,9 @@
         # 双端队列在collections模块
         # from collections import deque
         # dq = deque([1,2])
-        # dq.append('a')   # 从后面放数据  [1,2,'a'] append(self, *args, **kwargs)支持动态参数 所以[1,2,'a']在队列中是三个元素
+        # dq.append('a')   # 从后面放数据  [1,2,'a'] 
+        #若 dq.append(['a','b'])  则[1,2,['a','b']]
+         #若 dq.append('a','b')  则报错
         # dq.appendleft('b') # 从前面放数据 ['b',1,2,'a']
         # print(dq)
         # dq.insert(2,3)    #['b',1,3,2,'a']
