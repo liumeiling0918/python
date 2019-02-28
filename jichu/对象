@@ -129,7 +129,8 @@
 # 如果父类 子类都有 用子类的(覆盖)
     # 如果还想用父类的，单独调用父类的:
     #       父类名.方法名 需要自己传self参数
-    #       super().方法名 不需要自己传self
+    #       super().方法名 不需要自己传self 
+    #super是根据mro广度优先顺序找上一个类
 #例如# 派生
 # class Animal:
 #     def __init__(self,name,aggr,hp):
@@ -143,7 +144,7 @@
 #
 # class Dog(Animal):
 #     def __init__(self,name,aggr,hp,kind):
-#         Animal.__init__(self,name,aggr,hp)  #等价于super.__init(name,aggr,hp)__
+#         Animal.__init__(self,name,aggr,hp)  #等价于super().__init__(name,aggr,hp)
 #         self.kind = kind       # 派生属性
 #     def eat(self):
 #         Animal.eat(self)   # 如果既想实现新的功能也想使用父类原本的功能，还需要在子类中再调用父类
@@ -168,7 +169,7 @@
     # class Dog(Animal):
     #     def __init__(self,name,aggr,hp,kind):
     #         super().__init__(name,aggr,hp)  # 只在新式类中有，python3中所有类都是新式类
-    #         # super(子类，对象).__init__(name,aggr,hp)  即super(Dog，self).__init__(name,aggr,hp)
+    #         # super(子类，对象).__init__(name,aggr,hp)  即super(Dog，self).__init__(name,aggr,hp)(可忽略)
     #         # 等同于Animal.__init__(self,name,aggr,hp)
     #         self.kind = kind       # 派生属性
     #     def eat(self):
@@ -297,9 +298,199 @@
     # print(alex.get_pwd()) 报错
     print(alex._Person__get_pwd()) #'alex3714'
     
+    #父类的私有属性不能被子类调用
+    # 例如：
+    # class Foo:
+    #     __key = '123'
+    #
+    # class Son(Foo):
+    #     print(Foo.__key)   报错
+    
+ # property 内置装饰器函数 只在面向对象中使用
+ # 将方法装饰成类的属性，通过调用属性的方式调用:对象.属性
+ #被装饰的函数不能有其他的参数，且装饰后得到的属性不可通过对象.属性=newvalue更改
+    # 例如
+    # from math import pi
+    # class Circle:
+    #     def __init__(self,r):
+    #         self.r = r
+    #     @property  #将周长装饰成属性，通过对象.perimeter调用
+    #     def perimeter(self):
+    #         return 2*pi*self.r
+    #     @property
+    #     def area(self):
+    #         return self.r**2*pi
+    #
+    # c1 = Circle(5)
+    # print(c1.area)     # 圆的面积 78.53981633974483
+    # print(c1.perimeter) # 圆的周长 31.41592653589793
+    # c1.r=4
+    # c1.perimeter=5  #报错 装饰后得到的属性不可通过对象.属性=newvalue更改
+
+ # @property 不能含有额外的函数，且装饰后得到的属性不可通过对象.属性=newvalue更改
+    # class Person:
+    #     def __init__(self,name):
+    #         self.__name = name
+    #     @property
+    #     def name(self):
+    #         return self.__name + 'sb'
+    # tiger = Person('泰哥')
+    # print(tiger.name) #泰哥sb
+    # tiger.name='33' #报错
 
 
+ # 在@property 后面加上@函数名.setter 便可以通过对象.属性=新值 修改装饰后得到的属性
+    # 例如：
+    # class Person:
+    #     def __init__(self,name):
+    #         self.__name = name
+    #     @property
+    #     def name1(self):
+    #         return self.__name + 'sb'
+    #     @name1.setter
+    #     def name1(self,new_name):
+    #         self.__name = new_name
+    #
+    # tiger = Person('泰哥')
+    # print(tiger.name1) #调用的是name1函数装饰后的属性
+    # tiger.name1 = '全班' #调用的是name1.setter
+    # print(tiger.name1) #调用的是@name1.setter装饰的函数
+
+
+ # 属性 查看@property 修改@函数名.setter  删除@函数名.deleter
+    # class Person:
+    #     def __init__(self,name):
+    #         self.__name = name
+    #         self.price = 20
+    #     @property
+    #     def name(self):
+    #         return self.__name
+    #     @name.deleter
+    #     def name(self):
+    #         del self.__name
+    #     @name.setter
+    #     def name(self,new_name):
+    #         self.__name = new_name
+    #
+    # brother2 = Person('二哥')
+    # print(brother2.name) （调用@property装饰的函数）
+    # del brother2.name  #（调用@name.deleter装饰的函数）
+    # print(brother2.name) #报错 因为已经被删除
+
+    # class Person:
+    #     def __init__(self,name):
+    #         self.__name = name
+    #         self.price = 20
+    #     @property
+    #     def name(self):
+    #         return self.__name
+    #     @name.deleter
+    #     def name(self):
+    #         print('nihao')
+    #     @name.setter
+    #     def name(self,new_name):
+    #         self.__name = new_name
+    # brother2 = Person('二哥')
+    # print(brother2.name)
+    # del brother2.name #（调用@name.deleter装饰的方法）
+    # print(brother2.name) #结果 nihao 二哥
+
+# staticmathod  静态的方法 ***
+# classmethod   类方法    ****
+# 类的操作行为
+# 例如：# classmethod类方法：# 当这个方法的操作只涉及静态属性的时候 就应该使用classmethod来装饰这个方法
+    class Goods:
+        __discount = 0.8
+        def __init__(self,name,price):
+            self.name = name
+            self.__price = price
+        @property
+        def price(self):
+            return self.__price * Goods.__discount
+        @classmethod   # 把一个方法 变成一个类中的方法，这个方法就直接可以被类调用，不需要依托任何对象
+        def change_discount(cls,new_discount):  # self代表对象 cls代表本类
+            cls.__discount = new_discount
+
+    apple = Goods('苹果',5)
+    print(apple.price) #结果为4.0
+    Goods.change_discount(0.5)
+    print(apple.price)  #结果为2.5
+
+
+# staticmethod 静态方法
+# 在完全面向对象的程序中，如果一个函数 既和对象没有关系也和类没有关系
+# 只是在面向对象语言中，该函数必须放在某个类中，那么就用staticmethod将这个函数变成一个静态方法
+# 通过类名.静态方法调用
+# python是面向对象和面向函数编程
+    class Login:
+        def __init__(self,name,password):
+            self.name = name
+            self.pwd = password
+        def login(self):pass
+
+        @staticmethod  #与对象，类均没有关系 只是在面向对象语言中，该函数必须放在某个类中，所以用static修饰
+        def get_usr_pwd():   # 静态方法
+            usr = input('用户名 ：')
+            pwd = input('密码 ：')
+            Login(usr,pwd)
+
+        Login.get_usr_pwd()
         
+ # 通过反射 (可以通过字符串对类和对象进行操作)
+# 通过对象名获取对象属性和普通方法
+# 通过类名获取静态属性和类方法和静态方法
+
+# 普通方法self 静态方法@staticmethod 类方法@classmethod 属性方法@property
+
+class Teacher:
+    dic = {'查看学生信息':'show_student','查看讲师信息':'show_teacher'}
+    def __init__(self,name):
+        self.name=name
+    def show_student(self):
+        print('show_student')
+
+    def show_teacher(self):
+        print('show_teacher')
+
+    @classmethod  #类方法
+    def func(cls):
+        print('hahaha')
+
+
+# hasattr getattr delattr
+# 通过类名获取静态属性
+# print(Teacher.dic) #结果为{'查看学生信息': 'show_student', '查看讲师信息': 'show_teacher'}
+# # 利用反射
+# ret=getattr(Teacher,'dic') #相当于Teacher.dic
+# print(ret) #结果为{'查看学生信息': 'show_student', '查看讲师信息': 'show_teacher'}
+
+# 通过类名操作类方法
+# Teacher.func() #结果为hahaha
+# 利用反射
+# ret2=getattr(Teacher,'func')
+# ret2()  #结果为hahaha
+
+# 通过对象名获取对象属性
+# alex=Teacher('al')
+# print(alex.name) #结果为a1
+# # 通过反射
+# ret=getattr(alex,'name')
+# print(ret) #结果为a1
+
+# 通过对象名操作方法
+# alex = Teacher('al')
+# alex.show_student()  #'show_student'
+# 利用反射
+# f = getattr(alex,'show_student')
+# f()  #结果为'show_student'
+
+
+# 升级版：通过对象名操作方法
+# alex = Teacher('al')
+# key = input('输入需求 ：')
+# if hasattr(alex,Teacher.dic[key]): #若key=show_student ;相当于 getattr(alex,'show_student')
+#     func = getattr(alex,Teacher.dic[key]) #相当于alex.show_student()
+#     func()
  
 
 
