@@ -352,9 +352,29 @@
     #         self.__name = new_name
     #
     # tiger = Person('泰哥')
-    # print(tiger.name1) #调用的是name1函数装饰后的属性
-    # tiger.name1 = '全班' #调用的是name1.setter
-    # print(tiger.name1) #调用的是@name1.setter装饰的函数
+    # print(tiger.name1) #调用的是@property修饰的函数  泰哥sb
+    # tiger.name1 = '全班' #调用的是@setter修饰的函数 
+    # print(tiger.name1) #调用的是@property修饰的函数 全班sb
+    
+    # from math import pi
+    # class Circle:
+    #     def __init__(self,r):
+    #         self.r=r
+    #     @property
+    #     def perimeter(self):
+    #         return 2*pi*self.r
+    #     @perimeter.setter
+    #     def perimeter(self,newp):
+    #         self.r=newp
+    #     @perimeter.deleter
+    #     def perimeter(self):
+    #         del self.r
+    #         print('haha delete')
+    # c1=Circle(4)
+    # print(c1.perimeter) #调用的是@property修饰的函数 结果为25
+    # c1.perimeter=3  #调用的是@setter修饰的函数
+    # print(c1.perimeter) #调用的是@property修饰的函数 结果为18
+    # del c1.perimeter #haha delete
 
 
  # 属性 查看@property 修改@函数名.setter  删除@函数名.deleter
@@ -442,56 +462,292 @@
 
 # 普通方法self 静态方法@staticmethod 类方法@classmethod 属性方法@property
 
-class Teacher:
-    dic = {'查看学生信息':'show_student','查看讲师信息':'show_teacher'}
-    def __init__(self,name):
-        self.name=name
-    def show_student(self):
-        print('show_student')
+    class Teacher:
+        dic = {'查看学生信息':'show_student','查看讲师信息':'show_teacher'}
+        def __init__(self,name):
+            self.name=name
+        def show_student(self):
+            print('show_student')
 
-    def show_teacher(self):
-        print('show_teacher')
+        def show_teacher(self):
+            print('show_teacher')
 
-    @classmethod  #类方法
-    def func(cls):
-        print('hahaha')
-
-
-# hasattr getattr delattr
-# 通过类名获取静态属性
-# print(Teacher.dic) #结果为{'查看学生信息': 'show_student', '查看讲师信息': 'show_teacher'}
-# # 利用反射
-# ret=getattr(Teacher,'dic') #相当于Teacher.dic
-# print(ret) #结果为{'查看学生信息': 'show_student', '查看讲师信息': 'show_teacher'}
-
-# 通过类名操作类方法
-# Teacher.func() #结果为hahaha
-# 利用反射
-# ret2=getattr(Teacher,'func')
-# ret2()  #结果为hahaha
-
-# 通过对象名获取对象属性
-# alex=Teacher('al')
-# print(alex.name) #结果为a1
-# # 通过反射
-# ret=getattr(alex,'name')
-# print(ret) #结果为a1
-
-# 通过对象名操作方法
-# alex = Teacher('al')
-# alex.show_student()  #'show_student'
-# 利用反射
-# f = getattr(alex,'show_student')
-# f()  #结果为'show_student'
+        @classmethod  #类方法
+        def func(cls):
+            print('hahaha')
 
 
-# 升级版：通过对象名操作方法
-# alex = Teacher('al')
-# key = input('输入需求 ：')
-# if hasattr(alex,Teacher.dic[key]): #若key=show_student ;相当于 getattr(alex,'show_student')
-#     func = getattr(alex,Teacher.dic[key]) #相当于alex.show_student()
-#     func()
- 
+    # hasattr getattr delattr
+    # 通过类名获取静态属性
+    # print(Teacher.dic) #结果为{'查看学生信息': 'show_student', '查看讲师信息': 'show_teacher'}
+    # # 利用反射
+    # ret=getattr(Teacher,'dic') #相当于Teacher.dic
+    # print(ret) #结果为{'查看学生信息': 'show_student', '查看讲师信息': 'show_teacher'}
+
+    # 通过类名操作类方法
+    # Teacher.func() #结果为hahaha
+    # 利用反射
+    # ret2=getattr(Teacher,'func')
+    # ret2()  #结果为hahaha
+
+    # 通过对象名获取对象属性
+    # alex=Teacher('al')
+    # print(alex.name) #结果为a1
+    # # 通过反射
+    # ret=getattr(alex,'name')
+    # print(ret) #结果为a1
+
+    # 通过对象名操作方法
+    # alex = Teacher('al')
+    # alex.show_student()  #'show_student'
+    # 利用反射
+    # f = getattr(alex,'show_student')
+    # f()  #结果为'show_student'
+
+    # class A:pass
+    # class B(A):pass
+    # a = A()
+    # print(isinstance(a,A)) 判断是否是某个类的对象
+    # print(issubclass(B,A)) 判断B是否是A的子类 True issubclass(子类，父类)
+    # print(issubclass(A,B)) #False
+
+    # 反射 ： 是用字符串类型的名字 去操作 变量
+    # name = 1
+    # eval('print(name)')  # 通过字符串去操作，但是有安全隐患，因为有未知的函数
+
+    # 反射 就没有安全问题
+    # 反射 ： 是用字符串类型的名字 去操作 变量，操作的都是内存中存在的函数
+    # 反射对象中的属性和方法   # hasattr getattr setattr delattr
+    # class A:
+    #     def func(self):
+    #         print('in func')
+    #
+    # a = A()
+    # a.name = 'alex'
+    # a.age = 63
+    # # 通过反射得到对象的属性
+    # ret = getattr(a,'name')  # 通过字符串取到对象的属性
+    # print(ret)
+    # 变量名 = input('>>>')
+    # if hasattr(a,变量名):
+    #     print(getattr(a,变量名))
+    # # 通过字符串取到对象的属性的另一种方法，但是该方法不能通过字符串操作对象的方法
+    # print(a.__dict__)
+    # print(a.__dict__[变量名])
+    #
+    # # 通过反射操作对象的方法
+    # a.func()
+    # ret = getattr(a,'func')
+    # ret()
+
+    #反射类的属性和方法
+    # class A:
+    #     price = 20
+    #     @classmethod
+    #     def func(cls):
+    #         print('in func')
+    # # 反射类的属性
+    # # A.price
+    # print(getattr(A,'price'))
+    #
+    # # 反射类的方法 ：classmethod staticmethod
+    # # A.func()
+    # if hasattr(A,'func'):
+    #     getattr(A,'func')()
+
+    # 反射自定义的模块
+    # my模块中的内容
+    # day = 'Monday'
+    # def wahaha():
+    #     print('wahahaha')
+    # class C:
+    #     pass
+    #反射模块的属性
+    import my
+    # print(my.day)
+    # print(getattr(my,'day'))
+    # 反射模块的方法
+    # getattr(my,'wahaha')()
+    # 反射模块中的类
+    # getattr(my,'C')反射的是类的地址
+    # c=getattr(my,'C')() #可以通过c=getattr(my,'C')()创建对象
+
+    # 反射自己模块中的变量和函数
+    # def qqxing():
+    #     print('qqxing')
+    # year = 2018
+    # import sys
+    # print(sys.modules['__main__'].year) #2018
+    # sys.modules 记录了所有被导入的模块，sys.modules['__main__']是本模块
+    # # 反射自己模块中的变量
+    # # print(getattr(sys.modules['__main__'],'year'))
+    # # 反射自己模块中的函数
+    # # getattr(sys.modules['__main__'],'qqxing')()
+    # 但是我们一般不用sys.modules['__main__']，因为当本模块被其他模块导入时，sys.modules['__main__']不能找到该模块，而是应该通过该模块的名字寻找
+    # 所以我们一般用sys.modules[__name__]
+    # 模块中有一个变量__name__ , 例如若在本模块A中，有个变量__name__，
+    # 当在本模块A中执行时，该变量为__main__  即__name__=__main__
+    # 当我们执行其他模块B时（该模块导入了A模块） ，那么A模块中的__name__='A'
+    # 变量名 = input('>>>')
+    # print(getattr(sys.modules[__name__],变量名))
+
+
+    # 内置模块也能用
+    # time
+    # asctime
+    # import time
+    # print(getattr(time,'time')())
+    # print(getattr(time,'asctime')())
+
+
+
+    # 要反射的函数有参数怎么办?
+    # print(time.strftime('%Y-%m-%d %H:%M:S'))
+    # print(getattr(time,'strftime')('%Y-%m-%d %H:%M:S'))
+
+    # # setattr  设置修改变量
+    # class A:
+    #     pass
+    # a = A()
+    # setattr(a,'name','nezha')
+    # setattr(A,'name','alex')
+    # print(A.name) #alex
+    # print(a.name) #nezha
+    # #
+    # # # delattr 删除一个变量
+    # delattr(a,'name')
+    # print(a.name) # alex 对象中没有 所以找去类中找
+    # delattr(A,'name')
+    # print(a.name) #报错
+    # setattr  delattr一般不用
+
+内置的类方法和内置函数
+    # str(obj) 实际上调用obj.__str__
+    # repr(obj)实际上调用obj.__repr__
+    # object里有一个__str__，str(对象)一旦被调用，就返回调用这个方法的对象的内存地址
+    # 例如：
+    # class Teacher:
+    #     def __init__(self,name,salary):
+    #         self.name = name
+    #         self.salary = salary
+
+    # nezha = Teacher('哪吒',250) #结果为<__main__.Teacher object at 0x033E22B0>
+    # print(str(nezha))
+
+    # 在自定义的类中可以重写__str__方法：
+    # 例如
+    # class Teacher:
+    #     def __init__(self,name,salary):
+    #         self.name = name
+    #         self.salary = salary
+    #     def __str__(self):
+    #         return "Teacher's object :%s"%self.name
+    #
+    # nezha = Teacher('哪吒',250)
+    # print(str(nezha)) #调用重写后的__str__方法 #结果为Teacher's object :哪吒
+    # print(nezha)  # 打印一个对象的时候，就是调用nezha.__str__
+    # # l = [1,2,3,4,5]   # 实例化 实例化了一个列表类的对象
+    # # print(l)   实际上调用的是__str__  结果为[1,2,3,4,5] 列表类重写了__str__方法
+    # # %s 和str() 和 print(对象) 实际上都是走的__str__
+    #
+    # print('%s:%s'%('A',nezha)) #结果为 A:Teacher's object :哪吒
+    # #分析：str('A')='A' str(nezha)=Teacher's object :哪吒
+
+
+    # repr(obj)实际上调用obj.__repr__
+    # class Teacher:
+    #     def __init__(self,name,salary):
+    #         self.name = name
+    #         self.salary = salary
+    #     def func(self):
+    #         return 'wahaha'
+    # nezha = Teacher('哪吒',250)
+    # print(repr(nezha)) #<__main__.Teacher object at 0x02D2CDF0> 调用父类object的repr方法
+
+    #重写repr方法
+    # class Teacher:
+    #     def __init__(self,name,salary):
+    #         self.name = name
+    #         self.salary = salary
+    #     def __str__(self): #重写了str(对象)
+    #         return "Teacher's object :%s"%self.name
+    #     def __repr__(self):
+    #         return str(self.__dict__)
+    #     def func(self):
+    #         return 'wahaha'
+    #
+    # # %r repr()  实际上都是走的__repr__
+    # nezha = Teacher('哪吒',250)
+    # print(nezha)  # 打印一个对象的时候，就是调用nezha.__str__
+    # print(repr(nezha)) #{'name': '哪吒', 'salary': 250}
+    # print('>>> %r'%nezha) #>>> {'name': '哪吒', 'salary': 250}
+
+    #当repr被重写，str没有被重写时，repr()会调用重写后的repr, str()会调用重写后的repr
+    #当str被重写，repr没有被重写时，str()会调用重写后的str,repr()不会调用重写后的str()
+    # repr 是str的备胎，但str不能做repr的备胎
+    #例如 当repr被重写，str没有被重写时
+    # class Teacher:
+    #     def __init__(self,name,salary):
+    #         self.name = name
+    #         self.salary = salary
+    #     def __repr__(self):
+    #         return str(self.__dict__)
+    #     def func(self):
+    #         return 'wahaha'
+    # nezha = Teacher('哪吒',250)
+    # print(str(nezha)) #{'name': '哪吒', 'salary': 250}
+    # print(repr(nezha))  #{'name': '哪吒', 'salary': 250}
+
+    #例如str被重写，repr没有被重写
+    # class Teacher:
+    #     def __init__(self,name,salary):
+    #         self.name = name
+    #         self.salary = salary
+    #     def __str__(self): #重写了str(对象)
+    #         return "Teacher's object :%s"%self.name
+    #     def func(self):
+    #         return 'wahaha'
+    #
+    # nezha = Teacher('哪吒',250)
+    # print(str(nezha)) #Teacher's object :哪吒
+    # print(repr(nezha))  #<__main__.Teacher object at 0x00B9CDF0>
+
+    #总结 对于str(),如果没有__str__方法，会先找本类中的__repr__方法，再没有再找父类中的__str__。
+    # 对于repr(),只会找__repr__,如果没有找父类的
+    # 所以在程序中，repr,str只能重写一个时，必定去重写repr
+    # print(obj)或者'%s'%obj或者str(obj)的时候，实际上是内部调用了obj.__str__方法，如果str方法有，那么他返回的必定是一个字符串
+
+    # len()调用的是__len__
+
+    #析构函数__del__ python中解释器做了该行为
+    #del 先执行了__del__方法，再删除了变量  当变量的引用计数器为0时，解释器自动进行回收
+    # class A:
+    #     pass
+    # a = A()
+    # del a        # del先执行了__del__方法，再删除了变量
+
+    # __del__方法可以被重写
+    # class A:
+    #     def __del__(self):   # 析构函数: 在删除一个对象之前进行一些收尾工作
+    #         self.f.close()
+    # a = A()
+    # a.f = open('my.py')   # 打开文件的步骤：现在在操作系统中打开了一个文件，拿到了文件操作符存在了内存中
+    # del a # del先执行了__del__方法，再删除了变量,即先关闭文件(__del__方法)，在内存中删除该文件操作符，再删除变量a
+
+    # __call__方法
+    # class A:
+    #     def __init__(self,name):
+    #         self.name = name
+    #     def __call__(self):
+    #         '''
+    #         打印这个对象中的所有属性
+    #         :return:
+    #         '''
+    #         for k in self.__dict__:
+    #             print(k,self.__dict__[k])
+    # a = A('alex')
+    # a() #name alex
+    # # 对象()相当于调用了_call_方法
 
 
 
