@@ -1,0 +1,52 @@
+# configparse 创建ini类型的配置文件
+# import configparser
+# config = configparser.ConfigParser()
+# config["DEFAULT"] = {'ServerAliveInterval': '45',
+#                       'Compression': 'yes',
+#                      'CompressionLevel': '9',
+#                      'ForwardX11':'yes'
+#                      }
+# config['bitbucket.org'] = {'User':'hg'}
+#
+# config['topsecret.server.com'] = {'Host Port':'50022','ForwardX11':'no'}
+#
+# with open('example.ini', 'w') as f:
+#    config.write(f)
+#example.ini 是配置文件
+
+#查询
+# import configparser
+# config = configparser.ConfigParser()
+# config.read('example.ini')
+# print(config.sections())        #  结果为 ['bitbucket.org', 'topsecret.server.com']
+# print('bytebong.com' in config) # False
+# print('bitbucket.org' in config) # True
+
+# print(config['bitbucket.org']["user"])  # hg
+# print(config['DEFAULT']['Compression']) #yes
+# print(config['topsecret.server.com']['ForwardX11'])  #no
+#
+# print(config['bitbucket.org'])          #<Section: bitbucket.org>
+#
+# for key in config['bitbucket.org']:    # 设置了default结，则查询哪个结都会显示 返回config['bitbucket.org']和config['default']中的内容
+                                        # 注意,有default会默认default的键
+#     print(key)
+#
+# print(config.options('bitbucket.org'))  # 返回列表 同for循环,找到'bitbucket.org'下所有键
+#
+# print(config.items('bitbucket.org'))    # 返回列表 列表中的元素为元组 找到'bitbucket.org'下所有键值对
+#
+# print(config.get('bitbucket.org','compression')) # yes       get方法Section下的key对应的value
+
+#修改
+# import configparser
+# config = configparser.ConfigParser()
+# config.read('example.ini')   # 读文件
+# config.add_section('yuan')   # 增加section
+# config.remove_section('bitbucket.org')   # 删除一个section
+# config.remove_option('topsecret.server.com',"forwardx11")  # 删除一个配置项
+# config.set('topsecret.server.com','k1','11111')
+# config.set('yuan','k2','22222')
+# f = open('new2.ini', "w")
+# config.write(f) # 写进文件
+# f.close()
