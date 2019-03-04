@@ -1,0 +1,31 @@
+import json
+from collections import namedtuple
+Card=namedtuple('Card',['rank','suit'])
+c=Card(3,'红心') #Card(rank=3, suit='红心')
+print(c)
+
+class FranchDeck :
+    ranks=[str(n) for n in range(2,11)]+list('JOKA')
+    suits = ['红心', '方板', '梅花', '黑桃']
+    def __init__(self):
+        self._cards=[Card(rank,suit) for rank in FranchDeck.ranks
+                     for suit in FranchDeck.suits]
+    def __len__(self):
+        return len(self._cards)
+    def __getitem__(self, item):
+        return self._cards[item]
+    def __setitem__(self, key, value):
+        self._cards[key]=value
+    def __str__(self):
+        return json.dumps(self._cards,ensure_ascii=False)
+    #因为json.dumps 序列化时对中文默认使用的ascii编码.想输出真正的中文需要指定ensure_ascii=False：
+
+deck=FranchDeck()
+print(deck)
+print(deck[10])
+from  random import choice,shuffle
+print(choice(deck))
+shuffle(deck)
+print(deck)
+print(deck[10])
+print(deck[:5])
