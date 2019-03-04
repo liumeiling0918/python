@@ -751,4 +751,232 @@
 
 
 
+# class Foo:
+#     def __init__(self,name,age,sex):
+#             self.name = name
+#             self.age = age
+#             self.sex = sex
+#
+# f = Foo('egon', 38, '男')
+# print(f['name']) #报错
+
+# 通过__getitem__函数可以使用f['name']
+# class Foo:
+#     def __init__(self,name,age,sex):
+#             self.name = name
+#             self.age = age
+#             self.sex = sex
+#     def __getitem__(self, item):
+#         print('hello')
+#         if hasattr(self,item):
+#             return self.__dict__[item]
+
+#
+# f = Foo('egon1', 38, '男')
+# print(f['name']) #调用__getitem__(self, item) 结果为hello egon1
+# print(f['na']) #调用__getitem__(self, item) 结果为hello None
+
+#通过__setitem__函数可以使用f['name']=newValue设置新值
+# class Foo:
+#     def __init__(self,name,age,sex):
+#             self.name = name
+#             self.age = age
+#             self.sex = sex
+#     def __getitem__(self, item):
+#         print('hello')
+#         if hasattr(self,item):
+#             return self.__dict__[item]
+#     def __setitem__(self, key, value):
+#         self.__dict__[key] = value
+#
+# f = Foo('egon1', 38, '男')
+# print(f['name']) #调用__getitem__(self, item) 结果为hello egon1
+# print(f['na']) #调用__getitem__(self, item) 结果为hello None
+# f['name']='dog' #调用__setitem__(self, item)
+# print(f['name']) #调用__getitem__(self, item) 结果为hello dog
+# f['n']='123' #调用__setitem__(self, item)
+# print(f['n'])#调用__getitem__(self, item) 结果为hello 123
+
+
+
+#通过调用_delitem__进行删除
+# class Foo:
+#     def __init__(self,name,age,sex):
+#         self.name = name
+#         self.age = age
+#         self.sex = sex
+#
+#     def __getitem__(self, item):
+#         if hasattr(self,item):
+#             return self.__dict__[item]
+#
+#     def __setitem__(self, key, value):
+#         self.__dict__[key] = value
+#
+#     def __delitem__(self, key):
+#         del self.__dict__[key]
+#
+# f = Foo('egon',38,'男')
+# print(f['name']) #调用__getitem__(self, item) 结果为egon
+# f['hobby'] = '男' #调用__setitem__(self, item)
+# print(f.hobby,f['hobby']) #男 男
+# #del f.hobby      # object 原生支持  对应着__delattr__，可以自己重写__delattr__
+# del f['hobby']   # 调用了__delitem__(self, key) 等同于del f.hobby
+# print(f.__dict__) #{'name': 'egon', 'age': 38, 'sex': '男'}
+
+
+
+
+
+# __init__ 初始化方法
+# __new__  构造方法 : 创建一个对象
+# class A:
+#     def __init__(self):
+#         self.x = 1
+#         print('in init function')
+#     def __new__(cls, *args, **kwargs): #一般不需要重写
+#         print('in new function')
+#         return object.__new__(A, *args, **kwargs)
+#
+# a1 = A() #结果为in new function ，in init function（先创建对象，然后进行实例化）
+
+
+# 单例模式：一个类 始终 只有 一个 实例
+# 当你第一次实例化这个类的时候 就创建一个实例化的对象
+# 当你之后再来实例化的时候 就用之前创建的对象
+# 单例模式
+# class A:
+#     __instance = False
+#     def __init__(self,name,age):
+#         self.name = name
+#         self.age = age
+#     def __new__(cls, *args, **kwargs):
+#         if cls.__instance: #实例已经存在
+#             return cls.__instance
+#         cls.__instance = object.__new__(cls) #创建一个实例
+#         return cls.__instance
+#
+# egon = A('egg',38)
+# egon.cloth = '小花袄'
+# nezha = A('nazha',25)
+# print(egon) #结果为<__main__.A object at 0x02D36150> 第一次实例化，创建对象
+# print(nezha) #结果为<__main__.A object at 0x02D36150>   A的对象已经存在，不再重新创建对象
+# # 并且对对象重新进行初始化(__init__),name,age的值被覆盖
+# print(egon.name)  #nazha
+# print(nezha.name) #nazha
+# print(nezha.cloth) #小花袄
+# #此时的egon,nezha指向同一个对象
+
+
+# is 比较的是两个实例对象是不是完全相同，它们是不是同一个对象，占用的内存地址是否相同。
+# == 比较的是两个对象的内容是否相等，即内存地址可以不一样，内容一样就可以了。默认会调用对象的 __eq__()方法。
+# #__eq__方法
+# class A:
+#     def __init__(self,name):
+#         self.name = name
+# ob1 = A('egon')
+# ob2 = A('egon')
+# print(ob1 == ob2) #False
+
+#
+# # 使用__eq__方法
+# class A:
+#     def __init__(self,name):
+#         self.name = name
+#
+#     def __eq__(self, other):
+#         if self.__dict__ == other.__dict__:
+#             return True
+#         else:
+#             return False
+#
+
+# ob1 = A('egon')
+# ob2 = A('egon')
+# print(ob1 == ob2) #调用__eq__方法  结果为True
+#
+# # hash() 调用的是#__hash__方法
+# class A:
+#     def __init__(self,name,sex):
+#         self.name = name
+#         self.sex = sex
+#     def __hash__(self): #返回的必须是int
+#         return hash(self.name+self.sex)
+#
+# a = A('egon','男')
+# b = A('egon','nv')
+# print(hash(a)) #调用的是__hash__方法
+# print(hash(b)) #调用的是__hash__方法
+
+import json
+
+from collections import namedtuple
+Card = namedtuple('Card',['rank','suit'])   # rank 牌面的大小 suit牌面的花色
+c=Card(3,'红心') #Card(rank=3, suit='红心')
+print(c)
+
+class FranchDeck:
+    ranks = [str(n) for n in range(2,11)] + list('JQKA')   # 2-A
+    suits = ['红心','方板','梅花','黑桃']
+
+    def __init__(self):
+        self._cards = [Card(rank,suit) for rank in FranchDeck.ranks
+                                        for suit in FranchDeck.suits]
+# for rank in FranchDeck.ranks:
+#     for suit in FranchDeck.suits:
+#         self._cards.append(Card(rank, suit))
+
+    def __len__(self):
+        return len(self._cards)
+
+    def __getitem__(self, item):
+        return self._cards[item]
+
+    def __setitem__(self, key, value):
+        self._cards[key] = value
+
+    def __str__(self): #self._cards=[Card(rank='2', suit='红心'), Card(rank='2', suit='方板'),Card(rank='2', suit='梅花')]
+        return json.dumps(self._cards,ensure_ascii=False)
+    因为json.dumps 序列化时对中文默认使用的ascii编码.想输出真正的中文需要指定ensure_ascii=False：
+deck = FranchDeck()
+print(deck) #调用了__str__函数
+print(deck[10])
+from random import choice
+print(choice(deck)) #,从列表中随机选择一个
+# print(choice(deck))
+from random import shuffle
+shuffle(deck) #shuffle打乱列表的次序,
+print(deck)
+print(deck[10]) #对应于 __getitem__
+print(deck)
+print(deck[:5]) #对应于 __getitem__
+
+
+
+# 内置函数 内置的模块 内置的基础类型 < --- >类的内置方法
+# ==    __eq__
+# len()  __len__
+#hash  __hash__
+# set集合先比较hash,hash相同的话就比较eq
+# 例如
+# class A:
+#     def __init__(self,name,sex,age):
+#         self.name = name
+#         self.sex = sex
+#         self.age = age
+#
+#     def __eq__(self, other):
+#         if self.name == other.name and self.sex == other.sex:
+#             return True
+#         return False
+#
+#     def __hash__(self):
+#         return hash(self.name + self.sex)
+# a = A('egg','男',38)
+# b = A('egg','男',37)
+# print(set((a,b))) # set 依赖对象的 hash eq
+
+
+
+
 
