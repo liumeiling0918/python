@@ -353,7 +353,9 @@
         # # '{"kkk":"v"}'
         # dic_d = json.loads(str_d) # 反序列化
         # print(type(dic_d),dic_d)
-
+          因为json.dumps 序列化时对中文默认使用的ascii编码.想输出真正的中文需要指定ensure_ascii=False：
+          json.dumps(self._cards,ensure_ascii=False)
+          
         # 例如dump load方法
         import json
         # json dump load
