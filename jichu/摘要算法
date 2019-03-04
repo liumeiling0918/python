@@ -1,0 +1,69 @@
+# 摘要算法(把任意长度的数据转换成固定长度的串) 密码以密文的形式(摘要算法的结果)存在内存中,
+#import hashilib 做摘要计算的 把字节类型的内容进行摘要处理
+# 对于相同的字符串使用同一个算法进行摘要，得到的值总是不变的
+# 对于不同的字符串使用同一个算法进行摘要，得到的值必定不同的
+# 使用不同算法对相同的字符串进行摘要，得到的值应该不同
+# 不管使用什么算法，使用hashlib的方式永远不变
+# sha 算法 随着 算法复杂程度的增加,摘要的时间成本空间成本都会增加
+# 例如:
+# import hashlib   # 提供摘要算法的模块
+# md5 = hashlib.md5()
+# md5.update(b'123456')
+# print(md5.hexdigest())#hex十六进制  hexdigest十六进制的结果
+#aee949757a2e698417463d47acac93df
+# 例如:
+# import hashlib   # 提供摘要算法的模块
+# sha = hashlib.sha3_256()
+# sha.update(b'alex3714')
+# print(sha.hexdigest())
+
+# 摘要算法的功能
+# 1.密码的密文存储 (安全性方面)
+# 2. 文件的一致性验证 (验证正确性方面)
+    # 在下载的时候 检查我们下载的文件和远程服务器上的文件是否一致
+    # 两台机器上的两个文件 你想检查这两个文件是否相等(集群中的两个文件)
+
+#例如密码的密文存储 (安全性方面)
+# 用户的登录
+# import hashlib
+# usr = input('username :')
+# pwd = input('password : ')
+# with open('userinfo') as f:
+#     for line in f:
+#         user,passwd,role = line.split('|')
+#         md5 = hashlib.md5()
+#         md5.update(bytes(pwd,encoding='utf-8'))
+#         md5_pwd = md5.hexdigest()
+#         if usr == user and md5_pwd == passwd:
+#             print('登录成功')
+
+# 加盐 提高了安全性
+import hashlib
+# md5 = hashlib.md5(bytes('盐',encoding='utf-8'))
+# md5.update(b'123456')
+# print(md5.hexdigest())
+#上面的算法与下面的算法结果不一样
+# md5 = hashlib.md5()
+# md5.update(b'123456')
+# print(md5.hexdigest())
+
+
+
+# 动态加盐 进一步提高了安全性
+# 用户名 密码
+# 使用用户名的一部分或者 直接使用整个用户名作为盐
+# import hashlib   # 提供摘要算法的模块
+# md5 = hashlib.md5(bytes('盐',encoding='utf-8')+b'username的一部分')
+# # md5 = hashlib.md5()
+# md5.update(b'123456')
+# print(md5.hexdigest())
+#黑客一般不能破解摘要后的密文(密文-->明文),一般是仿照要访问的服务器,让用户访问该假服务器,获取明文密码
+#md5的加盐,动态加盐增加了安全性,所以一般对于安全方面需要加盐,而对于验证文件的一致性,不需要对md5加盐
+
+# 文件的一致性校验这里不需要加盐,且文件的内容较多,需要分批摘要
+# 例如:
+# import hashlib
+# md5 = hashlib.md5()
+# md5.update(b'第一行')
+# md5.update(b'第二行')
+# print(md5.hexdigest())
