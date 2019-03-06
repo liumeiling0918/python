@@ -1,0 +1,455 @@
+# ip地址不是一成不变的
+# 一个局域网内的几台机器之间 可以进行通信
+# 网关地址 : 整个局域网中的机器能通过网关ip与外界通信
+# 我们找寻一台机器 : ip地址
+    # 如何判断 要找的机器在不在同一个局域网内:
+        # 用自己的ip地址和子网掩码按位与运算,目标机器的ip地址和子网掩码按位与运算如果结果相同说明两台机器在同一个网段
+    # 要找的机器和你在同一个局域网内:
+        # 通过交换机
+
+    # 要找的机器和你不在同一个局域网内
+            # 先走交换机
+            # 交换机直接将消息传递给"网关ip",通过ip找到对应机器所在的局域网
+            # 路由表 :网段 网关ip
+            # 通过对方局域网中的交换机进行广播
+            # 把信息回传给交换机
+            # ......
+# TCP协议属于 : 传输层
+    # 面向连接 可靠的 字节流传输  长连接
+# UDP协议属于 : 传输层
+    # 面向数据包的 无连接的 不可靠的 速度快 不占用连接
+ 1.tcp的socket：
+  对于tcp来说，客户端，服务端都可以先给对方发送信息
+  #对于tcp来说，必须先启动服务端，然后启动客户端
+  ##server可以与多个client连接，但是只能与一个client同时通信
+  简单版：
+      服务端：
+      import socket
+      sk=socket.socket()  #创建套接字
+      sk.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1) #防止服务器端重启时报address already use
+      sk.bind(('127.0.0.1',8080)) #绑定端口
+      sk.listen() #监听客户请求
+      conn,addr=  sk.accept() #接听客户的连接  addr是别人的地址
+      while True:
+          ret=conn.recv(1024).decode('utf-8') #
+          if ret=='bye':
+              break
+          print(ret)
+          info=input('>>>')
+          conn.send(bytes(info,encoding='utf-8')) #必须传bytes类型
+      conn.close() 
+      sk.close() 
+      
+      客户端：
+      import socket
+      sk=socket.socket() #创建套接字
+      sk.connect(('127.0.0.1',8080)) #连接服务器
+      while True:
+        info=input('>>>')
+        sk.send(bytes(info,encoding='utf-8')) #info.encode('utf-8')
+        ret=sk.recv(1024).decode('utf-8')
+        print(ret)
+        if ret=='bye':
+            sk.send(b'bye')
+            break
+       sk.close()
+          
+     复杂版：当client1,client2都与server建立连接时：
+     #server与client建立的是长连接。如果client2也与server建立了连接，则可以连接，
+     但是只有server与client1的连接关闭后，server才收到client2发送的消息
+     服务端：
+      import socket
+      sk=socket.socket()
+      sk.bind(('127.0.0.1',8080))
+      sk.listen()
+      while True: #不断地建立连接，关闭连接 这样才可以与多个client通信，但是同一时刻只跟一个client通信
+          conn,addr=sk.accept()
+          while True:
+              msg=conn.recv(1024)
+              if msg==b'bye':
+                  break
+              print(msg.decode('utf-8'))
+              info=input('>>>')
+              conn.send(info.encode('utf-8'))
+          conn.close()
+      sk.close()
+     客户端1：
+      import socket
+      sk=socket.socket()
+      sk.connect(('127.0.0.1',8080))
+      while True:
+          info=input('>>>')
+          sk.send(info.encode('utf-8'))
+          msg=sk.recv(1024)
+          if msg == b'bye':
+              break
+          print(msg.decode('utf-8'))
+      sk.close()
+     客户端2：
+        import socket
+        sk=socket.socket()
+        sk.connect(('127.0.0.1',8080))
+        while True:
+            info=input('>>>')
+            sk.send(info.encode('utf-8'))
+            msg=sk.recv(1024)
+            if msg == b'bye':
+                break
+            print(msg.decode('utf-8'))
+        sk.close()
+        
+2.udp的socket 
+    #对于udp，服务器端不可主动发送信息给客户端，因为不知道客户端的地址
+    #对于udp来说，先启动客户端，服务端都可以
+    #server可以与多个client同时通信
+     简单版：
+        服务端：
+        import socket
+        sk=socket.socket(type=socket.SOCK_DGRAM)
+        sk.bind(('127.0.0.1',8080))
+        while True:
+            ms,addr=sk.recvfrom(1024)
+            print(ms.decode('UTF-8'))
+            info=input("请输入：")
+            sk.sendto(("服务器端的消息："+info).encode('utf-8'),addr)
+        sk.close()
+        客户端：
+        import socket
+        sk=socket.socket(type=socket.SOCK_DGRAM)
+        addr=('127.0.0.1',8080)
+        while True:
+            info=input('请输入')
+            sk.sendto(('来自客户一的消息：'+info).encode('utf-8'),addr)
+            msg,addr=sk.recvfrom(1024)
+            print(msg.decode('utf-8'))
+        sk.close()
+    复杂版：当client1,client2都与server建立通信时：可以同时通信
+        服务端：
+        import socket
+        sk=socket.socket(type=socket.SOCK_DGRAM)
+        sk.bind(('127.0.0.1',8080))
+        while True:
+            ms,addr=sk.recvfrom(1024)
+            print(ms.decode('UTF-8'))
+            info=input("请输入：")
+            sk.sendto(("服务器端的消息："+info).encode('utf-8'),addr)
+        sk.close()
+        客户端1：
+        import socket
+        sk=socket.socket(type=socket.SOCK_DGRAM)
+        addr=('127.0.0.1',8080)
+        while True:
+            info=input('请输入')
+            sk.sendto(('来自客户一的消息：'+info).encode('utf-8'),addr)
+            msg,addr=sk.recvfrom(1024)
+            print(msg.decode('utf-8'))
+        sk.close()
+        客户端2：
+        import socket
+        sk=socket.socket(type=socket.SOCK_DGRAM)
+        addr=('127.0.0.1',8080)
+        while True:
+            info=input('请输入')
+            sk.sendto(('来自客户二的消息：'+info).encode('utf-8'),addr)
+            msg,addr=sk.recvfrom(1024)
+            print(msg.decode('utf-8'))
+        sk.close()
+  3.黏包
+import os
+# os.system() 执行命令
+# os.popen() 功能强于os.system() , os.popen() 可以返回回显的内容，以文件描述符返回。
+os.system('cat /TCP/client.py')
+re=os.popen('dir')
+print(re.read())
+# subprocess的功能更强大，它可以将结果分类显示，输出信息放在stout中，错误信息放入stderr
+import subprocess
+res=subprocess.Popen('dir',shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+# 将输出信息stdout放在管道中，错误信息stderr放在管道中
+# 管道中的信息可输入可输出
+print('stdout:',res.stdout.read().decode('gbk')) #res.stdout.read()接受的是字节
+print('stderr:',res.stderr.read().decode('gbk'))
+
+需求：#远程执行命令：在server端下发命令，client执行命令并返回结果
+ 3.1基于tcp(会发生黏包)
+   #在server端下发命令
+    import socket
+    sk=socket.socket()
+    sk.bind(('127.0.0.1',8080))
+    sk.listen()
+    conn,addr=sk.accept()
+    while True:
+        cmd=input('>>>')
+        conn.send(cmd.encode('utf-8'))
+        ret=conn.recv(1024).decode('utf-8')
+        print(ret)
+    conn.close()
+    sk.close()
+    
+ #在client接受命令并执行
+  import  socket
+  import subprocess
+  sk=socket.socket()
+  sk.connect(('127.0.0.1',8080))
+  while True:
+      cmd=sk.recv(1024).decode('utf-8') #首先接受服务端发送的命令
+      res=subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE) #执行命令
+      #发送结果给服务端
+      std_out='stdout is:'+res.stdout.read().decode('gbk')
+      std_err='stderr is:'+res.stderr.read().decode('gbk')
+      sk.send(std_out.encode('utf-8'))
+      sk.send(std_err.encode('utf-8'))
+  sk.close()
+ #对于tcpp来说，必须先启动服务端,然后监听客户端的连接
+#服务器发送一次命令，客户端发送了两条信息，但是服务端只接受到了一条
+#当服务端再执行下一条命令时，才收到客户端上一次剩下的信息
+# 黏包现象：数据混乱，数据没有接收完（多条消息只接收到某几条），数据接收多（接收了多余的消息）
+ 3.2基于udp(不会发生黏包)
+    #在server端下发命令
+    import socket
+    sk=socket.socket(type=socket.SOCK_DGRAM)
+    sk.bind(('127.0.0.1',9000))
+    msg,addr=sk.recvfrom(1024)
+    while True:
+        cmd=input('>>>')
+        if cmd=='q':
+            break
+        sk.sendto(cmd.encode('utf-8'),addr)
+        msg,addr=sk.recvfrom(1024)
+        print(msg.decode('utf-8'))
+        msg1,addr=sk.recvfrom(1024)
+        print(msg1.decode('utf-8'))
+    sk.close()
+    #在client接受命令并执行
+    import socket
+    import subprocess
+    sk=socket.socket(type=socket.SOCK_DGRAM)
+    addr=('127.0.0.1',9000)
+    sk.sendto(b'hello',addr)#该信息无用，只是为了给服务端地址
+    while True:
+        cmd,addr=sk.recvfrom(1024)
+        res = subprocess.Popen(cmd.decode('utf-8'), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)  # 执行命令
+        # 发送结果给服务端
+        std_out = 'stdout is:' + res.stdout.read().decode('gbk')
+        std_err = 'stderr is:' + res.stderr.read().decode('gbk')
+        print(std_out)
+        print(std_err)
+        sk.sendto(std_out.encode('utf-8'),addr)
+        sk.sendto(std_err.encode('utf-8'),addr)
+    sk.close()
+    #对于udp，服务器端不可主动发送信息给客户端，因为不知道客户端的地址
+    #对于udp来说，先启动客户端，服务端都可以
+    #udp不会黏包，但是会丢失包
+    # TCP是面向数据流的，每次将数据流分成数据块，然后封包
+    # UDP是面向数据包的，每次发送一个包，包的大小有限制
+    # 黏包问题：
+# 发送方：连续send了两个小数据,因为Nagle优化算法发送方将这两个时间间隔小的且数据小的数据在缓存中缓存下来一起发送
+# 接收方：发送方发送了一个大数据，接收方有两个recv，第一个recv的数量特别小，只接收了发送方的一部分数据；
+# 发送方剩余的数据被缓存在接收方缓存中，等待第二个recv（这样剩余的数据会和后面新发的数据会被黏在一起）
+
+3.3# 黏包的本质：不知道接收多大数据
+#解决方案1：发送方将数据的大小发送给接收方，接收方收到以后发送确认消息给发送方，然后发送方发送数据
+    # 好处：确定了接收数据的大小
+    # 坏处：多了一次交互的过程（发送方将数据的大小发送给接收方，接收方收到以后发送确认消息给发送方）
+    # 例如当发送方发送了35672字节，
+    #     while(data>0):
+    #         if data>4096:
+    #             send(4096)
+    #             data=data-4096
+    #         else:
+    #             send(data)
+                # data=data-4096
+
+    # 例如当接收方接收了35672字节，
+    #     while(data>0):
+    #         if data>2048:
+    #             recv(2048)
+    #             data=data-2048
+    #         else:
+    #             recv(data)
+    #             data=data-2048
+    例如：使用该方法解决远程执行命令的黏包问题
+    server端：
+    import socket
+    sk = socket.socket()
+    sk.bind(('127.0.0.1',8090))
+    sk.listen()
+
+    conn,addr = sk.accept()
+    while True:
+        cmd = input('cmd : ')
+        if cmd == 'q':
+            conn.send(cmd.encode('utf-8'))
+            break
+        conn.send(cmd.encode('utf-8'))
+        num = int(conn.recv(1024).decode('utf-8')) #接受数据的长度
+        conn.send(b'ok')
+        print('stdout+stderr: ',conn.recv(num).decode('gbk'))
+    conn.close()
+    sk.close()
+    client端：
+    import socket
+    import subprocess
+    sk = socket.socket()
+    sk.connect(('127.0.0.1',8090))
+    while True:
+        cmd = sk.recv(1024).decode('utf-8')
+        if cmd == 'q': break
+        res = subprocess.Popen(cmd,shell=True,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE)
+        # sk.send(res.stdout.read())  #管道中的数据只能读一次
+        # sk.send(res.stderr.read())
+        std_out=res.stdout.read()
+        std_err=res.stderr.read()
+        sk.send(str(len(std_out)+len(std_err)).encode('utf-8'))
+        sk.recv(1024) #ok 防止黏包
+        sk.send(std_out)
+        sk.send(std_err)
+    sk.close()
+    第二种解决方法：使用struct模块
+    #struct模块
+    # 将数据转成固定长度的bytes
+    import struct
+    ret=struct.pack('i',4096) #i表示int 即把一个数字转成固定长度的bytes类型
+    print(ret,len(ret)) #b'\x00\x10\x00\x00' 以4个字节压缩
+    r=struct.unpack('i',ret)  #返回一个元组 (4096,)
+    print(r)
+    struct的简单版：
+    server端：
+    import socket
+    import struct1
+    sk = socket.socket()
+    sk.bind(('127.0.0.1',8090))
+    sk.listen()
+
+    conn,addr = sk.accept()
+    while True:
+        cmd = input('cmd : ')
+        if cmd == 'q':
+            conn.send(cmd.encode('utf-8'))
+            break
+        conn.send(cmd.encode('utf-8'))
+        num=conn.recv(4) #4
+        num=struct1.unpack('i',num)[0] #2048
+        print('stdout+stderr: ',conn.recv(int(num).decode('gbk'))) #2048
+    conn.close()
+    sk.close()
+    client端：
+      import socket
+      import subprocess
+      import struct1
+      sk = socket.socket()
+      sk.connect(('127.0.0.1',8090))
+      while True:
+          cmd = sk.recv(1024).decode('utf-8')
+          if cmd == 'q': break
+          res = subprocess.Popen(cmd,shell=True,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
+         #管道中的数据只能读一次
+          std_out=res.stdout.read()
+          std_err=res.stderr.read()
+          len_num=len(std_out) + len(std_err)
+          num_by=struct1.pack('i',len_num)
+          sk.send(num_by)
+          sk.send(std_out)
+          sk.send(std_err)
+      sk.close()
+      复杂版：
+      大文件的上传与下载：客户端的文件发送给服务端
+      server端：
+      import socket
+      import struct
+      import json
+      sk=socket.socket()
+      sk.bind(('127.0.0.1',8090))
+      sk.listen()
+      conn,addr=sk.accept()
+      buffer=1024
+      head_len=conn.recv(4) #接收报文长度，该长度已经被struct处理过
+      head_len=struct.unpack('i',head_len)[0]
+      head=conn.recv(head_len).decode('utf-8') #解码
+      head=json.loads(head) #反序列化
+      filesize=head['filesize'] #获取文件长度
+      #创建文件，用于存储接收的文件
+      with open(head['filename'],'wb') as f:
+      #接收文件 每次接收buffer个字节
+          while filesize:
+              if filesize>=buffer:
+                  content=conn.recv(buffer) #不用转码，因为原文件传输的时候就没有转码，视频就是字节内容
+                  f.write(content)
+                  filesize=filesize-buffer
+              else:
+                  content=conn.recv(filesize)
+                  f.write(content)
+                  filesize=0
+                  break
+      conn.close()
+      sk.close()
+      client端：
+        import socket
+        import os
+        import json
+        import struct
+        sk=socket.socket()
+        sk.connect(('127.0.0.1',8090))
+        buffer=1024 #内核态缓存的大小 即每次发送文件时的大小
+        #发送文件
+        head={'filepath':'G:\python视频\Python全栈9期（第一部分）：基础+模块+面向对象+网络编程\day32',
+                'filename':'01 python fullstack s9day32 复习.mp4',
+                'filesize':None
+        }
+        filepath=os.path.join(head['filepath'],head['filename'])
+        filesize=os.path.getsize(filepath)
+        head['filesize']=filesize
+        json_head=json.dumps(head,ensure_ascii=False)
+        bytes_head=json_head.encode('utf-8')
+        print(json_head)
+        print(bytes_head)
+        len_head=len(bytes_head) #报头的长度
+        pack_len=struct.pack('i',len_head)
+        sk.send(pack_len)  #先发报头的长度
+        sk.send(bytes_head) #在发送bytes类型的报头
+
+        #发送文件 每次发送buffer个字节
+        with open(filepath,'rb')as f:
+            while filesize:
+                if filesize>=buffer:
+                    content=f.read(buffer)
+                    sk.send(content)
+                    filesize=filesize-buffer
+                else:
+                    content=f.read(filesize)
+                    sk.send(content)
+                    filesize=0
+                    break
+        sk.close()
+      
+    
+
+    
+    
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+  
+
+ 
+
+
+    
+        
+
+
+ 
+     
+
+      
+  
