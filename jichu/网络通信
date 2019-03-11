@@ -247,6 +247,7 @@ print('stderr:',res.stderr.read().decode('gbk'))
 # 发送方剩余的数据被缓存在接收方缓存中，等待第二个recv（这样剩余的数据会和后面新发的数据会被黏在一起）
 
 3.3# 黏包的本质：不知道接收多大数据
+解决方案：在传输大量数据之前告诉接收端要发送数据的大小
 #解决方案1：发送方将数据的大小发送给接收方，接收方收到以后发送确认消息给发送方，然后发送方发送数据
     # 好处：确定了接收数据的大小
     # 坏处：多了一次交互的过程（发送方将数据的大小发送给接收方，接收方收到以后发送确认消息给发送方）
@@ -306,9 +307,12 @@ print('stderr:',res.stderr.read().decode('gbk'))
         sk.send(std_out)
         sk.send(std_err)
     sk.close()
+    
     第二种解决方法：使用struct模块
     #struct模块
     # 将数据转成固定长度的bytes
+    pack 将数据转换成固定长度的字节
+    unpack得到的是一个元组，元组的第一个元素就是数据
     import struct
     ret=struct.pack('i',4096) #i表示int 即把一个数字转成固定长度的bytes类型
     print(ret,len(ret)) #b'\x00\x10\x00\x00' 以4个字节压缩
@@ -355,8 +359,8 @@ print('stderr:',res.stderr.read().decode('gbk'))
           sk.send(std_out)
           sk.send(std_err)
       sk.close()
-      复杂版：
-      大文件的上传与下载：客户端的文件发送给服务端
+      
+      大文件的上传与下载：客户端的文件发送给服务端复杂版：
       server端：
       import socket
       import struct
