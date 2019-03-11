@@ -428,6 +428,99 @@ print('stderr:',res.stderr.read().decode('gbk'))
                     filesize=0
                     break
         sk.close()
+        
+ 使用hmac验证客户端连接的合法性
+ # http://website?username='name'&password='pwd'
+# 对于client来说，会有黑客偷取账号和密码
+# 对于server来说，会有不合法的client访问
+import hmac #类似于hashlib
+h=hmac.new() #key密钥，要加密数据的bytes类型
+h.digest() #密文
+hmac.compare_digest() #对比密文
+
+server端：
+    import socket
+    import os
+    import hmac
+    secre_key=b'egg'
+    sk=socket.socket()
+    sk.bind(('127.0.0.1',8080))
+    sk.listen()
+    #检验连接的合法性的函数
+    def  check_conn(conn):
+        msg=os.urandom(32)#随机生成32字节的数据
+        conn.send(msg)
+        h=hmac.new(secre_key,msg)
+        digest=h.digest()
+        client_digest=conn.recv(1024)
+        return hmac.compare_digest(digest,client_digest)
+
+    conn,addr=sk.accept()#
+    res=check_conn(conn)
+    if res:
+        print('合法的客户端')
+        conn.close()
+    else:
+        print('不合法的客户端')
+        conn.close()
+    sk.close()
+    
+client端：
+    import socket
+    import hmac
+    secret_key=b'egg'
+    sk=socket.socket()
+    sk.connect(('127.0.0.1',8080))
+    msg=sk.recv(1024) #对msg生成密文
+    h=hmac.new(secret_key,msg)
+    digist=h.digest()
+    sk.send(digist)
+    sk.close()
+   
+  socketserver实现并发的socket
+    server端：
+    import socketserver
+    class MyServer(socketserver.BaseRequestHandler):
+        def handle(self):
+            while True:
+                msg=self.request.recv(1024).decode('utf-8')#self.request相当于conn
+                if msg=='q':
+                    self.request.close()
+                    break
+                print(msg)
+                info=input('>>>')
+                self.request.send(info.encode('utf-8'))
+
+
+    if __name__=='__main__':
+        server=socketserver.ThreadingTCPServer(('127.0.0.1',8080),MyServer)
+        server.serve_forever()
+        
+     client1端
+        import socket
+        sk=socket.socket()
+        sk.connect(('127.0.0.1',8080))
+        while True:
+            msg=input(">>>")
+            sk.send(msg.encode('utf-8'))
+        sk.close()
+        
+           
+     client2端
+        import socket
+        sk=socket.socket()
+        sk.connect(('127.0.0.1',8080))
+        while True:
+            msg=input(">>>")
+            sk.send(msg.encode('utf-8'))
+        sk.close()
+     
+  
+
+
+
+ 
+        
       
     
 
