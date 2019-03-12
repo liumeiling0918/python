@@ -1,0 +1,369 @@
+# 主进程中开启一个子进程，当主进程关闭后，子进程不一定关闭
+# 例如某个进程的父进程是pycharm,当pycharm关闭后，程序不一定结束
+# 例如在cmd中部署运行某个程序，当cmd窗口关闭后，部署的程序并没有停止运行
+1.定义进程的两种方式：
+    开启进程的第一种方式：
+      简单的多进程demo:
+          import os
+          import time
+          from multiprocessing import Process
+          def func(args,args2):
+              print(args,args2)
+              time.sleep(3)
+              print('子进程 :', os.getpid())
+              print('子进程的父进程 :', os.getppid())
+              print(12345)
+
+          if __name__ == '__main__':
+              p = Process(target=func,args=('参数','参数2'))   # 注册
+              # p是一个进程对象,还没有启动进程
+              p.start()       # 开启了一个子进程
+              print('*'*10)
+              print('父进程 :',os.getpid()) # 查看当前进程的进程号
+              print('父进程的父进程 :',os.getppid()) # 查看当前进程的父进程
+
+      开启多个进程的demo:
+        import os
+        import time
+        from multiprocessing import Process
+
+        def func(filename,content):
+            with open(filename,'w') as f:
+                f.write(content*10*'*')
+
+        if __name__ == '__main__':
+            p_lst = []
+            for i in range(10):
+                p = Process(target=func,args=('info%s'%i,i))
+                p_lst.append(p)
+                p.start()
+            for p in p_lst:p.join()   # 之前的所有进程必须在这里都执行完才能执行下面的代码[p.join() for p in p_lst]
+            print([i for i in os.walk(r'G:\python视频\Python全栈9期（第二部分）：并发编程+数据库+前端\1. 并发编程\Day36\day37')])
+            #os.walk(文件名) 打印该文件名下的所有文件
+
+      开启多进程的第二种方式：
+        # 自定义类 继承Process类
+        # 必须实现一个run方法,run方法中是在子进程中执行的代码
+        from multiprocessing import Process
+        class MyProcess(Process):
+            def __init__(self,arg1,arg2):
+                super().__init__() #调用父类的init方法
+                self.arg1 = arg1
+                self.arg2 = arg2
+
+            def run(self):
+                print(self.pid) #打印进程id
+                print(self.name) #打印进程名
+                print(self.arg1)
+                print(self.arg2)
+
+        if __name__ == '__main__':
+            p1 = MyProcess(1,2)
+            p1.start()
+            p2 = MyProcess(3,4)
+            p2.start()
+   使用多进程模拟socket:
+   server端：
+    import socket
+    from multiprocessing import Process
+    def serve(conn):
+        ret = '你好'.encode('utf-8')
+        conn.send(ret)
+        msg = conn.recv(1024).decode('utf-8')
+        print(msg)
+        conn.close()
+
+    if __name__ == '__main__' :
+        sk = socket.socket()
+        sk.bind(('127.0.0.1',8080))
+        sk.listen()
+        try:
+            while True:
+                conn,addr = sk.accept()
+                p = Process(target=serve,args=(conn,))
+                p.start()
+        finally:
+            sk.close()
+            
+   client端：
+    import socket
+    sk = socket.socket()
+    sk.connect(('127.0.0.1',8080))
+    msg = sk.recv(1024).decode('utf-8')
+    print(msg)
+    msg2 = input('>>>').encode('utf-8')
+    sk.send(msg2)
+    sk.close()
+
+   
+  2.守护进程
+  # 守护进程：程序运行时，在后台提供服务的一种线程
+  # 守护进程会随着主进程的代码执行完毕而结束(随着主进程的代码结束有关系，跟主进程的结束没有关系)
+  #p.daemon=True 设置为守护进程
+  #设置守护进程的demo:
+    from multiprocessing import Process
+    import time
+    def func():
+        while True:
+            time.sleep(0.5)
+            print('我很好')
+
+    if __name__=='__main__':
+        p=Process(target=func)
+        p.daemon=True
+        p.start()
+        i=0
+        while i<10: #模拟主进程实现的功能
+            print('我是socket server')
+            time.sleep(1)
+            i+=1
+3.使用锁实现资源的同步（同一个时刻只有一个进程执行同步的代码）
+  # from multiprocessing import Lock
+  # l = Lock()
+  # l.acquire()  
+  # 会造成数据不安全的操作
+  # l.release()   
+  锁的demo:('ticket'文件中的内容为：{"ticket": 0})
+  from multiprocessing import Process
+  import json
+  import time
+  from multiprocessing import Lock
+  def show(i):
+      with open('ticket') as f:
+          dic=json.load(f)
+      print('余票：%s'%dic['ticket'])
+
+  def buy_ticket(i,lock): #加锁实现同步
+      lock.acquire()#获取锁
+      with open('ticket') as f:
+          dic=json.load(f)
+          time.sleep(0.1)
+      if dic['ticket']>0:
+          dic['ticket']-=1
+          print('\033[32m%s买到票了\033[0m'%i)
+      else:
+          print('\033[31m%s没买到票\033[0m'%i)
+
+      with open('ticket','w') as f:
+          json.dump(dic,f)
+      lock.release()#释放锁
+
+  if __name__=='__main__':
+      for i in range(10):
+          p=Process(target=show,args=(i,))
+          p.start()
+      lock=Lock()
+      for i in range(10):
+          p=Process(target=buy_ticket,args=(i,lock))
+          p.start()
+4.相关方法和属性
+  # 方法
+      # 进程对象.start()     开启一个子进程
+      # 进程对象.join()      感知一个子进程的结束
+      # 进程对象.terminate() 结束一个子进程
+      # 进程对象.is_alive()  查看某个子进程是否还在运行
+  # 属性
+      # 进程对象.name        进程名
+      # 进程对象.pid         进程号
+      # 进程对象.daemon      值为True的时候,表示新的子进程是一个守护进程
+              # 守护进程 随着主进程代码的执行结束而结束
+              # 一定在start之前设置
+#注意：子进程中不能做input
+from multiprocessing import Process
+def func():
+    num = input('>>>')
+    print(num)
+
+if __name__ == '__main__':
+    Process(target=func).start()
+#该程序报错，因为我们在子进程中要求 input('>>>')，这个在控制台不能执行（控制台显示的是主进程） 
+
+5.信号量：
+#某段代码 同一个时间只能被n个进程执行
+    from multiprocessing import Process
+    from multiprocessing import Semaphore
+    import random
+    import time
+    def ktv(i,sem):
+        sem.acquire()
+        print('%s走进了ktv'%i)
+        time.sleep(random.randint(3,5))
+        print('%s走出了ktv' % i)
+        sem.release()
+
+    if __name__=='__main__':
+        sem=Semaphore(4) #同一个时间只有四个人在ktv中
+        for i in range(20):
+            p=Process(target=ktv,args=(i,sem))
+            p.start()
+            
+ 6.事件
+       # 事件： 通过一个信号来控制多个进程同时执行或者阻塞
+       # 一个信号可以使所有的进程都进入阻塞状态，也可以控制所有的进程解除阻塞
+      # 一个事件被创建之后,默认是阻塞状态
+      # set 用来修改一个事件的状态 True
+      # clear 用来修改一个事件的状态 False
+      # is_set 用来查看一个事件的状态
+      # wait 是依据事件的状态来决定自己是否在wait处阻塞
+          #  当is_set为False阻塞，当is_set为True不阻塞
+       例如：
+      from multiprocessing import Event
+      e = Event()  # 创建了一个事件
+      print(e.is_set()) #False   # 查看一个事件的状态,默认被设置成阻塞
+      e.set()       # 将这个事件的状态改为True
+      print(e.is_set()) #True
+      e.wait()     # 是依据e.is_set()的值来决定是否阻塞的
+      print(123456) # 123456 因为状态时True,所以不阻塞
+      e.clear()    # 将这个事件的状态改为False
+      print(e.is_set()) #False
+      e.wait()     # 阻塞 等待事件的信号被变成True
+      print('*'*10) #因为被阻塞所以不打印  
+
+      简单的事件demo:
+      # 红绿灯事件
+      import time
+      import random
+      from multiprocessing import Event,Process
+      def cars(e,i):
+          if not e.is_set():
+              print('car%i在等待'%i)
+              e.wait()    # 阻塞 直到得到一个 事件状态变成 True 的信号
+          print('\033[0;32;40mcar%i通过\033[0m' % i)
+
+      def light(e):
+          while True:
+              if e.is_set():
+                  e.clear()
+                  print('\033[31m红灯亮了\033[0m')
+              else:
+                  e.set()
+                  print('\033[32m绿灯亮了\033[0m')
+              time.sleep(2)
+
+      if __name__ == '__main__':
+          e = Event()
+          traffic = Process(target=light,args=(e,))
+          traffic.start()
+          for i in range(20):
+              car = Process(target=cars, args=(e,i))
+              car.start()
+              time.sleep(random.random())
+
+ 7.队列
+  q.put() #入队，若队列已满则会阻塞，直到有取值get出队元素为止
+  q.get() #出队，若队列已空则阻塞，直到有put入队元素为止
+  q.full()   # 队列是否满了
+  q.empty() #队列是否为空
+  q.get_nowait() #出队，若队列已空则并不阻塞，而是过一会来取值（该方法会报异常）
+  简单的队列demo:
+      from multiprocessing import Queue,Process
+      def produce(q):
+          q.put('hello')
+
+      def consume(q):
+          print(q.get())
+
+      if __name__ == '__main__':
+          q = Queue()
+          p = Process(target=produce,args=(q,))
+          p.start()
+          c = Process(target=consume, args=(q,))
+          c.start()
+          
+   #生产者消费者模型demo1：
+   #使用Queue
+    from multiprocessing import Process,Queue
+    import time,random
+    #生产者
+    def producer(name,food,q):
+        for i in range(10):
+            time.sleep(random.randint(1,3))
+            re='%s生产了%s%s'%(name,food,i)
+            print(re)
+            q.put(re)
+     #消费者要求实现：当消费完所有food时，则结束程序（停止阻塞）
+    def consumer(q,name):
+        while True:
+            food=q.get()
+            if food is None:
+                print('%s获取了结束标志'%name)
+                break
+            #这里不使用q.empty()判断是否消费完所有food，因为当消费者判断q.empty()为空时，这个值还没有返回，生产者又往队列中放了food
+            # 所以q.empty()并不代表消费者已经消费完所有的food，只是代表队列暂时为空
+            re = '\033[31m%s消费了%s\033[0m' % (name, food)
+            print(re)
+            time.sleep(random.randint(1,3))
+
+    if __name__=='__main__':
+        q=Queue(20)
+        p=Process(target=producer,args=('egon','包子',q))
+        p.start()
+        p1 = Process(target=producer, args=('wusir', '饺子', q))
+        p1.start()
+        c = Process(target=consumer, args=(q,'alex' ))
+        c.start()
+        c1 = Process(target=consumer, args=(q, 'afds'))
+        c1.start()
+        p.join()
+        p1.join()
+        #使用join()让主进程感知到生产者进程的结束，然后入队结束标志
+        q.put(None) #第一个消费者接收到结束标志
+        q.put(None) #第二个消费者接收到结束标志
+    #但是该程序有个缺点;每个消费者进程只有收到None时才代表结束，那么每次创建一个消费者进程就需要放一个结束标志即q.put(None)
+    
+      #生产者消费者模型demo2：
+     #使用JoinableQueue
+      from multiprocessing import Process,JoinableQueue
+      import time,random
+      #JoinableQueue有一个计数器，当q.put()时，计数器count会加1
+      #                          当q.task_done()时，计数器count会减1 （一般当数据消费且处理完后，执行task_done()）
+      #                           q.join()会阻塞，直到队列中的所有数据被处理完，即count=0
+      #生产者
+      def producer(name,food,q):
+          for i in range(10):
+              time.sleep(random.randint(1,3))
+              re='%s生产了%s%s'%(name,food,i)
+              print(re)
+              q.put(re)
+              q.join()
+       #消费者要求实现：当消费完所有food时，则结束程序（停止阻塞）
+      def consumer(q,name):
+          while True:
+              food=q.get()
+              re = '\033[31m%s消费了%s\033[0m' % (name, food)
+              print(re)
+              time.sleep(random.randint(1,3))
+              q.task_done()
+
+      if __name__=='__main__':
+          q=JoinableQueue(20)
+          p=Process(target=producer,args=('egon','包子',q))
+          p.start()
+          p1 = Process(target=producer, args=('wusir', '饺子', q))
+          p1.start()
+          c = Process(target=consumer, args=(q,'alex' ))
+          c1 = Process(target=consumer, args=(q, 'afds'))
+          c.daemon=True
+          c1.daemon=True #设置为守护进程，则当主进程结束后，该进程也结束
+          c.start()
+          c1.start()
+          p.join() #使用join方法，使得生产者进程结束后，主进程才结束
+          p1.join()
+
+      # 过程：
+      # 生产者往队列中放数据(q.put())，每次入队计数器都会加1
+      # 消费者往队列中消费数据（q.get()），每次出队数据且处理完数据后会使用q.task_done()使得计数器都减1
+      # 生产者的q.join()会阻塞，直到队列中的所有数据被处理完，即count=0
+      #
+      # 在主函数中：
+      # 使用p.join()使得生产者进程结束后，主进程才结束
+      # 使用c.daemon=True使得主进程结束后，消费者进程会自动结束
+      #进程结束顺序：生产者进程，主进程，消费者进程
+  
+ 
+  
+  
+    
+  
+      
+   
