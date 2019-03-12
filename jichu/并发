@@ -359,10 +359,403 @@ if __name__ == '__main__':
       # 使用p.join()使得生产者进程结束后，主进程才结束
       # 使用c.daemon=True使得主进程结束后，消费者进程会自动结束
       #进程结束顺序：生产者进程，主进程，消费者进程
-  
+  8.管道
+          from multiprocessing import Pipe,Process
+        # 计算机的信息通信方式分为单工通信、半双工通信及全双工通信三种，
+        # 而管道属于半双工通信。半双工通信可以实现双向通信，但不能在两个方向上同时进行，必须交替进行。
+        #例如：
+            # conn1,conn2=Pipe()
+            # conn1.send('1234')
+            # ret=conn2.recv()
+            # print(ret)
+
+        #简单的demo1：当数据接收完毕后停止程序(通过发送结束标志实现)
+        # def func(conn1,conn2): #只用到conn1
+        #     conn2.close()
+        #     while True:
+        #         msg=conn1.recv()
+        #         if msg is None:break
+        #         print(msg)
+        #
+        # if __name__=='__main__':
+        #     conn1,conn2=Pipe()
+        #     Process(target=func,args=(conn1,conn2)).start()
+        #     conn1.close() #关闭主进程的conn1
+        #     for i in range(20):
+        #         conn2.send('chilema') #主进程conn2用于发送数据，那么子进程在conn1才能接收到数据
+        #     conn2.send(None)
+
+        #简单的demo2：当数据接收完毕后停止程序(通过管道抛出的异常实现)
+        #注意：每个进程的conn1,conn2互不影响
+        #当只关闭管道的所有发送端，而不关闭接收端时会报错，因为当管道中的数据已空且发送端已经关闭不再发送数据时，接收端不应该再等待接收数据
+        #例如下面程序抛出EOF异常，所以我们可以通过捕获异常来结束程序
+        # （当管道的发送端都关闭，接收端也已经接收了管道中的所有数据，这时管道会抛出异常，我们可以通过该异常感知接收端接收数据结束）
+        def func(conn1,conn2): #只用到conn1
+            conn2.close() #关闭子进程的conn2
+            while True:
+                try:
+                    msg=conn1.recv()
+                    print(msg)
+                except EOFError:
+                    conn1.close()
+                    break
+
+        if __name__=='__main__':
+            conn1,conn2=Pipe()
+            Process(target=func,args=(conn1,conn2)).start()
+            conn1.close() #关闭主进程的conn1
+            for i in range(20):
+                conn2.send('chilema') #主进程conn2用于发送数据，那么子进程在conn1才能接收到数据
+            conn2.close() #关闭主进程的conn2
+
+
+
+        #以下demo就不会抛出异常，因为子进程中的conn2没有关闭，子进程的conn1会一直等待接收数据
+        def func(conn1,conn2): #只用到conn1
+            while True:
+                    msg=conn1.recv()
+                    print(msg)
+
+
+        if __name__=='__main__':
+            conn1,conn2=Pipe()
+            Process(target=func,args=(conn1,conn2)).start()
+            conn1.close() #关闭主进程的conn1
+            for i in range(20):
+                conn2.send('chilema') #主进程conn2用于发送数据，那么子进程在conn1才能接收到数据
+            conn2.close() #关闭主进程的conn2
+
+        #注意：每个进程的conn1,conn2互不影响
+        #管道不是进程安全，当多个进程从管道中获取数据时，会获取到同一个数据。需要自己加锁实现数据安全
+        #队列是进程安全，同一个时刻只有一个进程从队列中获取数据
+        
+         #管道实现消费者生产者模式
+        #管道是不安全的，当多个消费者去获取数据时，可能会获取同一个数据
+        # 例如消费者1去请求获取管道中的数据（此时数据还没有返回给消费者1），消费者2也去请求获取管道中的数据
+        # 结果消费者1，消费者2获取了同样的数据，因此要求加锁
+        # from multiprocessing import Lock,Pipe,Process
+        # def producer(con,pro,name,food):
+        #     con.close()
+        #     for i in range(100):
+        #         f = '%s生产%s%s'%(name,food,i)
+        #         print(f)
+        #         pro.send(f)
+        #     pro.send(None)
+        #     pro.send(None)
+        #     pro.send(None)
+        #     pro.close()
+        #
+        # def consumer(con,pro,name):
+        #     pro.close()
+        #     while True:
+        #             food = con.recv()
+        #             if food is None:
+        #                 con.close()
+        #                 break
+        #             print('%s吃了%s' % (name, food))
+        # if __name__ == '__main__':
+        #     con,pro = Pipe()
+        #     p = Process(target=producer,args=(con,pro,'egon','饺子'))
+        #     c1 = Process(target=consumer, args=(con, pro, 'alex'))
+        #     c2 = Process(target=consumer, args=(con, pro, 'bossjin'))
+        #     c3 = Process(target=consumer, args=(con, pro, 'wusir'))
+        #     c1.start()
+        #     c2.start()
+        #     c3.start()
+        #     p.start()
+        #     con.close()
+        #     pro.close()
+
+
+        #通过lock实现线程安全
+        # from multiprocessing import Process,Pipe,Lock
+        # def consumer(produce, consume,name,lock):
+        #     produce.close()
+        #     while True:
+        #         lock.acquire()
+        #         baozi=consume.recv()
+        #         lock.release()
+        #         if baozi:
+        #             print('%s 收到包子:%s' %(name,baozi))
+        #         else:
+        #             consume.close()
+        #             break
+        #
+        # def producer(produce, consume,n):
+        #     consume.close()
+        #     for i in range(n):
+        #         produce.send(i)
+        #     produce.send(None)
+        #     produce.send(None)
+        #     produce.close()
+        #
+        # if __name__ == '__main__':
+        #     produce,consume=Pipe()
+        #     lock = Lock()
+        #     c1=Process(target=consumer,args=(produce,consume,'c1',lock))
+        #     c2=Process(target=consumer,args=(produce,consume,'c2',lock))
+        #     p1=Process(target=producer,args=(produce,consume,30))
+        #     c1.start()
+        #     c2.start()
+        #     p1.start()
+        #     produce.close()
+        #     consume.close()
  
+9.通过manage实现进程之间数据的共享
+
+        ## 对于一般数据来说，进程之间是互相不共享的
+        # 使用manage以后，可以让数据变成进程间共享的数据
+
+        #例如对于进程之间不共享的数据
+        # from multiprocessing import Manager,Process
+        # def main(dic):
+        #     dic['count'] -= 1
+        #     print(dic) #{'count': 99}
+
+        # if __name__ == '__main__':
+        #     dic={'count':100}
+        #     p_lst = []
+        #     p = Process(target=main, args=(dic,))
+        #     p.start()
+        #     p.join()
+        #     print('主进程', dic) #主进程 {'count': 100}
+
+        #使用manage让数据变成进程间共享的数据
+        # from multiprocessing import Manager,Process
+        # def main(dic):
+        #     dic['count'] -= 1
+        #     print(dic) #{'count': 99}
+        #
+        # if __name__ == '__main__':
+        #     m = Manager()
+        #     dic=m.dict({'count':100})
+        #     p_lst = []
+        #     p = Process(target=main, args=(dic,))
+        #     p.start()
+        #     p.join()
+        #     print('主进程', dic) #主进程 {'count': 99}
+
+
+        #manage是进程不安全的，当多个进程去共享某个数据，同时对这个数据进行操作时，会发生问题（类似于管道中的不安全问题）
+        # from multiprocessing import Manager,Process
+        # def main(dic):
+        #     dic['count'] -= 1
+        #
+        # if __name__ == '__main__':
+        #     m = Manager()
+        #     dic=m.dict({'count':100})
+        #     p_lst = []
+        #     for i in range(50):
+        #         p = Process(target=main,args=(dic,))
+        #         p.start()
+        #         p_lst.append(p)
+        #     for i in p_lst: i.join()
+        #     print('主进程',dic) #主进程 {'count': 51} {'count': 52} 等等结果不定
+
+        #通过加锁实现manage的进程安全
+        # from multiprocessing import Manager,Process,Lock
+        # def main(dic,lock):
+        #     lock.acquire()
+        #     dic['count'] -= 1
+        #     lock.release()
+        # 
+        # if __name__ == '__main__':
+        #     m = Manager()
+        #     l = Lock()
+        #     dic=m.dict({'count':100})
+        #     p_lst = []
+        #     for i in range(50):
+        #         p = Process(target=main,args=(dic,l))
+        #         p.start()
+        #         p_lst.append(p)
+        #     for i in p_lst: i.join()
+        #     print('主进程',dic)
   
-  
+  10.进程池
+ # p = Pool()
+# p.map(funcname,iterable)     默认异步的执行任务,且自带close和join
+# p.apply   同步调用的
+# p.apply_async 异步调用 和主进程完全异步 需要手动close 和 join
+    通过map（默认为异步）
+        # import time
+        # from multiprocessing import Pool,Process
+        # def func(n):#每个参数打印10次
+        #     for i in range(10):
+        #         print(n)
+        #
+        # if __name__ == '__main__':
+        #     #使用进程池（5个进程）完成任务的时间
+        #     #一般进程池中进程的数量是cpu的数量加1
+        #     start = time.time()
+        #     pool = Pool(5)               # 5个进程
+        #     pool.map(func,range(100))    # 100个任务 map(函数，可迭代类型的参数)
+        #     t1 = time.time() - start
+             #结果为0 0 ...（打印100遍）1 1 ...（打印100遍）... 99（打印100遍）
+        #
+        #     # 使用100个进程完成任务的时间
+        #     start = time.time()
+        #     p_lst = []
+        #     for i in range(100):
+        #         p = Process(target=func,args=(i,))
+        #         p_lst.append(p)
+        #         p.start()
+        #     for p in p_lst :p.join()
+        #     t2 = time.time() - start
+        #     print(t1,t2)
+
+
+        # import time
+        # from multiprocessing import Pool,Process
+        # def func(n):#每个参数打印10次
+        #     for i in range(10):
+        #         print(n)
+        #
+        # def func2(n):#每个参数打印10次
+        #     for i in range(10):
+        #         print(n)
+        # if __name__ == '__main__':
+        #     #使用进程池（5个进程）完成任务的时间
+        #     #使用同一个进程池可以执行不同的任务
+        #     pool = Pool(5)               # 5个进程
+        #     pool.map(func,range(100))    # 100个任务 map(函数，可迭代类型的参数)
+        #     pool.map(func2,['alex','egon'])   #2个任务
+                
+        #apply同步调用
+        # import os
+        # import time
+        # from multiprocessing import Pool
+        # def func(n):
+        #     print('start func%s'%n,os.getpid())
+        #     time.sleep(1)
+        #     print('end func%s' % n,os.getpid())
+        # 
+        # if __name__ == '__main__':
+        #     p = Pool(5)
+        #     for i in range(10):
+        #         #同步
+        #         p.apply(func,args=(i,))
+        #         #结果为：   start func0 30440
+        #                 #  end func0 30440
+        #                 #  start func0 8000
+        #                #  end func0 8000
+        #         #异步调用
+        # 
+        #         import os
+        #         import time
+        #         from multiprocessing import Pool
+
+        #apply_async异步调用
+        import os
+        import time
+        from multiprocessing import Pool
+        def func(n):
+            print('start func%s' % n, os.getpid())
+            time.sleep(1)
+            print('end func%s' % n, os.getpid())
+
+
+        if __name__ == '__main__':
+            p = Pool(5)
+            for i in range(10):
+                p.apply_async(func,args=(i,))
+                #若没有p.join(),主进程与进程池中的进程异步执行，主进程结束后进程池中的任务也不再执行
+                p.close()  # 结束进程池接收任务
+                p.join()   # 感知进程池中的任务执行结束，注意进程池中的进程并不会结束
+                    # 结果为：   start func0 30440
+                    #           start func0 8000
+                    #          end func0 30440
+                    #         end func0 8000
+                    
+进程池的返回值
+    #apply同步执行 当一个进程完成一个任务后，才让下一个进程执行另一个任务
+    # from multiprocessing import Pool
+    # def func(i):
+    #     return i*i
+    #
+    # if __name__ == '__main__':
+    #     p = Pool(5)
+    #     for i in range(10):
+    #         res = p.apply(func,args=(i,))   # apply的结果就是func的返回值
+    #         print(res)
+
+    #apply_async异步执行 当一个进程还没有完成一个任务，下一个进程也可以执行另一个任务，多个进程可以同时执行任务
+    #但是get()方法会阻塞，直到进程执行任务的结果返回 所以此时异步并不起作用
+    import time
+    # from multiprocessing import Pool
+    # def func(i):
+    #     time.sleep(0.5)
+    #     return i*i
+    #
+    # if __name__ == '__main__':
+    #     p = Pool(5)
+    #     # for i in range(10):
+    #     #     res = p.apply_async(func,args=(i,))   # apply的结果就是func的返回值
+    #     #     print(res.get()) #get()方法会阻塞，直到进程执行任务的结果返回 所以此时异步并不起作用
+    #     #结果依次一个一个出来  0 1 4 9 16 25 ....
+    #     #可以使用以下方法获取任务的执行结果，且实现异步
+    # if __name__ == '__main__':
+    #     p = Pool(5)
+    #     res_l = []
+    #     for i in range(10):
+    #         res = p.apply_async(func,args=(i,))   # apply的结果就是func的返回值
+    #         res_l.append(res)
+    #     for res in res_l:print(res.get()) # 结果会五个五个出来 0 1 4 9 16 25 ....
+
+
+    #使用map实现异步执行
+    import time
+    from multiprocessing import Pool
+    def func(i):
+        time.sleep(0.5)
+        return i*i
+
+    if __name__ == '__main__':
+        p = Pool(5)
+        ret = p.map(func,range(10))
+        print(ret) #结果会一次性出来 结果为[0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
+        
+进程池的回调函数           
+    # 回调函数 callback
+    # import os
+    # from multiprocessing import Pool
+    # def func1(n):
+    #     print('in func1',os.getpid())
+    #     return n*n
+    #
+    # def func2(nn):
+    #     print('in func2',os.getpid())
+    #     print(nn)
+    #
+    # if __name__ == '__main__':
+    #     print('主进程 :',os.getpid())
+    #     p = Pool(5)
+    #     p.apply_async(func1,args=(10,),callback=func2)
+    #     p.close()
+    #     p.join()
+    #     #将func1的返回值作为参数传递给func2执行，func2且在主进程中执行（func1在子进程中执行）
+    #     #结果为
+    #     # 主进程: 5896
+    #     # in func1 29220
+    #     # in func2 5896
+    #     # 100
+复杂版：
+    import os
+    from multiprocessing import Pool
+    def func1(n):
+        print('in func1',os.getpid())
+        return n*n
+
+    def func2(nn):
+        print('in func2',os.getpid())
+        print(nn)
+
+    if __name__ == '__main__':
+        print('主进程 :',os.getpid())
+        p = Pool(5)
+        for i in range(10):
+            p.apply_async(func1,args=(10,),callback=func2)
+        p.close()
+        p.join()
     
   
       
