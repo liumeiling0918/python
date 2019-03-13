@@ -46,3 +46,9 @@
     这种方式太麻烦，所以在python中使用r表示保持原型(即将字符串的内容读成正则原型)
     正则中\n在python中 r"\n"      实际表示匹配换行
     正则中\\n在python中r"\\n"   实际表示匹配\n
+    例子：
+    import re
+    r=r'.*?<i>.*?(\d+)'
+    com=re.compile(r,re.S)
+    ret=re.findall(com,'3333<i>sfa(9999)')
+    print(ret) #['9999']
