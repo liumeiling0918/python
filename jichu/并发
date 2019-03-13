@@ -702,7 +702,7 @@ if __name__ == '__main__':
     #     for res in res_l:print(res.get()) # 结果会五个五个出来 0 1 4 9 16 25 ....
 
 
-    #使用map实现异步执行
+    #使用map实现异步 执行map的结果是个列表，任务执行结果的列表
     import time
     from multiprocessing import Pool
     def func(i):
@@ -756,7 +756,38 @@ if __name__ == '__main__':
             p.apply_async(func1,args=(10,),callback=func2)
         p.close()
         p.join()
+   使用进程池模仿socketserver
+   server端：
+    import socket
+    from multiprocessing import Pool
+
+    def func(conn):
+        conn.send(b'hello')
+        print(conn.recv(1024).decode('utf-8'))
+        conn.close()
+
+    if __name__ == '__main__':
+        p = Pool(5)
+        sk = socket.socket()
+        sk.bind(('127.0.0.1',8080))
+        sk.listen()
+        while True:
+            conn, addr = sk.accept()
+            p.apply_async(func,args=(conn,))
+        sk.close()
+        
+   client端：
+    import socket
+    sk = socket.socket()
+    sk.connect(('127.0.0.1',8080))
+
+    ret = sk.recv(1024).decode('utf-8')
+    print(ret)
+    msg = input('>>>').encode('utf-8')
+    sk.send(msg)
+    sk.close()
     
+
   
       
    
