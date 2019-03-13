@@ -1,4 +1,5 @@
 地址 http://www.cnblogs.com/Eva-J/articles/7228075.html#_label7
+正则测试 http://tool.chinaz.com/regex/
 # collection模块 python中的扩展数据类型
 # random模块 随机数模块
 # os模块 和操作系统打交道的模块
@@ -106,6 +107,7 @@
         # print(ret.group()) #结果为123
         # ret = obj.search('abcashgjgsdghkash456eeee3wr2') #正则表达式对象调用search，参数为待匹配的字符串
         # print(ret.group())  #结果 ：456
+        
 
         #finditer返回一个存放匹配结果的迭代器,迭代器中的每个元素的内容需要用group查看
         # import re
