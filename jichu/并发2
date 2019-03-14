@@ -198,7 +198,383 @@
   print(threading.current_thread())  #打印主线程名 <_MainThread(MainThread, started 59988)>
   print(threading.enumerate()) #返回一个包含正在运行的线程名称的list
   
-  
+  5.多线程实现socketserver
+  server端：
+    #主线程接收连接后，子线程负责处理收发数据
+    import socket
+    from threading import Thread
+
+    def chat(conn):
+        conn.send(b'hello')
+        msg = conn.recv(1024).decode('utf-8')
+        print(msg)
+        conn.close()
+
+    sk=socket.socket()
+    sk.bind(('127.0.0.1',8080))
+    sk.listen()
+    while True:
+        conn,addr=sk.accept()
+        Thread(target=chat,args=(conn,)).start()
+    sk.close()
+   client端：
+    import socket
+    sk = socket.socket()
+    sk.connect(('127.0.0.1',8080))
+    msg = sk.recv(1024)
+    print(msg)
+    inp = input('>>> ').encode('utf-8')
+    sk.send(inp)
+    sk.close()
+    
+   6.守护线程
+   # 守护进程随着主进程代码的执行结束而结束 (守护的是主进程)
+    # 守护线程会在主线程结束之后等待其他子线程的结束才结束 （守护的是所有线程）
+    #例如以下的demo，线程t会等待线程t2,主线程都执行完毕以后才结束
+    import time
+    from threading import Thread
+    def func1():
+        while True:
+            print('*'*10)
+            time.sleep(1)
+    def func2():
+        print('in func2')
+        time.sleep(5)
+
+    t = Thread(target=func1,)
+    t.daemon = True
+    t.start()
+    t2 = Thread(target=func2,)
+    t2.start()
+    print('主线程')
+
+    # 主进程在执行完自己的代码之后不会立即结束 而是等待子进程结束之后回收子进程的资源
+    #主进程的代码执行结束以后，并不影响非守护进程的子进程的运行
+    #例如以下demo,主进程代码结束后还等待子进程的结束
+    # import time
+    # from multiprocessing import Process
+    # def func():
+    #     time.sleep(5)
+    #
+    # if __name__ == '__main__':
+    #         Process(target=func).start()
+   
+   7.线程间的锁：
+    #线程间的数据不安全
+    #当线程1获取GIL锁，得到CPU的执行权，取数据n进行操作，
+    # 但当线程1还没将数据n的结果返回时，cpu的时间片已到，线程2获取了GIL锁，得到CPU的执行权，取数据n进行操作。这时就照成了数据的不安全
+    # import time
+    # from threading import Lock,Thread
+    # def func(lock):
+    #     global n
+    #     temp = n
+    #     time.sleep(0.2)
+    #     n = temp - 1
+    #
+    # n = 10
+    # t_lst = []
+    # lock = Lock()
+    # for i in range(10):
+    #     t = Thread(target=func,args=(lock,))
+    #     t.start()
+    #     t_lst.append(t)
+    #
+    # for t in  t_lst: t.join()
+    # print(n) #结果大于0   9，8，7等都有可能
+    #总结：
+    #进程的不安全是由于多个进程同时对某个数据进行操作
+    #线程的不安全：虽然同一个时刻只有一个线程在执行，但是某个线程还没将数据的操作结果写回就失去了GIL锁，另一个线程便获取了执行权而对数据进行了操作
+
+    # Lock 互斥锁
+    # import time
+    # from threading import Lock,Thread
+    # # Lock 互斥锁
+    # def func(lock):
+    #     global n
+    #     lock.acquire()
+    #     temp = n
+    #     time.sleep(0.2)
+    #     n = temp - 1
+    #     lock.release()
+    #
+    # n = 10
+    # t_lst = []
+    # lock = Lock()
+    # for i in range(10):
+    #     t = Thread(target=func,args=(lock,))
+    #     t.start()
+    #     t_lst.append(t)
+    #
+    # for t in  t_lst: t.join()
+    # print(n) #0
+
+    #以下demo发生死锁
+    # 当一个科学家拿了面条，另一个科学家拿了叉子就会死锁
+    # 科学家拿了面条和拿了叉子才能吃面
+    # noodle_lock  = Lock()
+    # fork_lock = Lock()
+    # def eat1(name):
+    #     noodle_lock.acquire()
+    #     print('%s拿到面条啦'%name)
+    #     fork_lock.acquire()
+    #     print('%s拿到叉子了'%name)
+    #     print('%s吃面'%name)
+    #     fork_lock.release()
+    #     noodle_lock.release()
+    #
+    # def eat2(name):
+    #     fork_lock.acquire()
+    #     print('%s拿到叉子了'%name)
+    #     time.sleep(1)
+    #     noodle_lock.acquire()
+    #     print('%s拿到面条啦'%name)
+    #     print('%s吃面'%name)
+    #     noodle_lock.release()
+    #     fork_lock.release()
+    #
+    # Thread(target=eat1,args=('alex',)).start()
+    # Thread(target=eat2,args=('Egon',)).start()
+    # Thread(target=eat1,args=('bossjin',)).start()
+    # Thread(target=eat2,args=('nezha',)).start()
+
+    #递归锁可以解决死锁问题，相当于同时获取多把锁
+    import time
+    from threading import Lock,Thread
+    from threading import RLock   # 递归锁
+    fork_lock = noodle_lock  = RLock()
+    # 对于递归锁来说，当线程获取了其中一把锁，其他锁就不能被其他线程获取
+    def eat1(name):
+        noodle_lock.acquire()            # 一把钥匙
+        print('%s拿到面条啦'%name)
+        fork_lock.acquire()
+        print('%s拿到叉子了'%name)
+        print('%s吃面'%name)
+        fork_lock.release()
+        noodle_lock.release()
+
+    def eat2(name):
+        fork_lock.acquire()
+        print('%s拿到叉子了'%name)
+        time.sleep(1)
+        noodle_lock.acquire()
+        print('%s拿到面条啦'%name)
+        print('%s吃面'%name)
+        noodle_lock.release()
+        fork_lock.release()
+
+    Thread(target=eat1,args=('alex',)).start()
+    Thread(target=eat2,args=('Egon',)).start()
+    Thread(target=eat1,args=('bossjin',)).start()
+    Thread(target=eat2,args=('nezha',)).start()
+
+8.信号量
+import time
+from threading import Semaphore,Thread
+def func(sem,a,b):
+    sem.acquire()
+    time.sleep(1)
+    print(a+b)
+    sem.release()
+
+sem = Semaphore(4)
+for i in range(10):
+    t = Thread(target=func,args=(sem,i,i+5))
+    t.start()  #结果4个4个打印
+    
+9.事件：
+# 事件被创建的时候
+# False状态
+    # wait() 阻塞
+# True状态
+    # wait() 非阻塞
+# clear 设置状态为False
+# set  设置状态为True
+
+#多线程实现数据库连接的demo
+#  第一个线程 : 测试网络连通性
+        # 等待一个信号 告诉网络之间的连通性
+        # 当网络连通时，设置事件的标志为True
+#  第二个线程 : 连接数据库
+#       当检测网络是连通时，连接数据库。否则就阻塞，等待网络连通的事件标志
+
+import time
+import random
+from threading import Thread,Event
+def check_web(e):
+    time.sleep(random.randint(0,3)) #模拟网络延迟
+    e.set() #网络连通
+
+def connenct_db(e):
+    count=0
+    while count<3: #最多连接3次，每次尝试连接数据库的时间不超过1秒
+        # e.wait() #一直阻塞，直到网络连通
+        e.wait(1) ##一直阻塞，直到网络连通或者阻塞时间到达一秒
+        if e.is_set()==True:
+            print('连接数据库')
+            break
+        else:
+            print('连接失败')
+            count+=1
+    else: #即count>=3
+        raise TimeoutError('数据库连接超时')
+
+e=Event()
+Thread(target=check_web,args=(e,)).start()
+Thread(target=connenct_db,args=(e,)).start()
+
+10.condition
+# 条件
+# acquire release wait notify
+# 一个条件被创建时默认有一个False状态，该False状态会影响wait一直处于等待状态
+# notify(n)参数必须为int类型，唤醒n个被阻塞的线程
+from threading import Thread,Condition
+def func(con,i):
+        con.acquire()
+        con.wait()
+        print('in第%s个函数里' %i)
+        con.release()
+con=Condition()
+for i in range(10):
+    Thread(target=func,args=(con,i)).start()
+while True:
+    n=int(input('>>>'))
+    con.acquire()
+    con.notify(n)#唤醒n个线程
+    con.release()
+    
+11.Timer定时器
+# Timer(n,func) 等待n秒后执行函数func
+#例如下面的demo实现每5秒钟执行一次时间同步 （通过递归时间）
+from threading import Timer
+def hello(name):
+    print ("时间同步 %s\n" % name)
+    global timer
+    timer = Timer(2.0, hello, ["Hawk"])
+    timer.start()
+
+if __name__ == "__main__":
+    t = Timer(2.0, hello, ["Hawk"])
+    t.start()
+    
+12.队列
+# queue #线程安全的
+import queue
+q = queue.Queue()  # 队列 先进先出
+# q.put() #若队列已满则阻塞
+# q.get() #若队列为空则阻塞
+# q.put_nowait()#队列已满也不阻塞，而是过一会来放值（会报错）
+# q.get_nowait()#队列已空也不阻塞，而是过一会来取值（会报错）
+
+# q = queue.LifoQueue()  # 栈 先进后出
+# q.put(1)
+# q.put(2)
+# q.put(3)
+# print(q.get()) #3
+# print(q.get()) #2
+
+q = queue.PriorityQueue()  # 优先级队列
+q.put((20,'a')) #put(优先级，元素) 数字越小优先级越高
+q.put((10,'b'))
+q.put((30,'c'))
+q.put((-5,'d'))
+q.put((-5,'z'))
+q.put((1,'?'))
+print(q.get()) #(-5, 'd') -5的优先级最高，优先级相同时，按照ascII排列('d'的ascII小)
+
+13.线程池和进程池
+# from concurrent.futures import ThreadPoolExecutor
+# import time
+# def func(n):
+#     time.sleep(2)
+#     print(n)
+#
+# #线程池中线程的个数一般不超过cpu的个数*5
+# tpool=ThreadPoolExecutor(max_workers=5)#创建线程池
+# for i in range(20):
+#     tpool.submit(func,i)
+# #submit()异步执行任务 五个五个的打印结果，但是不一定按0,1,2,3顺序打印，因为任务不一定是按顺序执行
+# tpool.shutdown()
+# print('主线程')
+# #shutdown实现了停止接收任务，并在主线程执行结束之前完成线程池的任务
+# # 若没有shutdown可能会先打印'主线程'，后五个五个的打印结果
+# #有shutdown会先五个五个的打印结果，后打印'主线程'
+
+#线程池 （有返回值的任务）
+# from concurrent.futures import ThreadPoolExecutor
+# import time
+# def func(n):
+#     time.sleep(2)
+#     print(n) #任务不一定是按顺序执行
+#     return n*n
+#
+# #线程池中线程的个数一般不超过cpu的个数*5
+# tpool=ThreadPoolExecutor(max_workers=5)#创建线程池
+# t_lst=[]
+# for i in range(20):
+#     t=tpool.submit(func,i)
+#     t_lst.append(t)
+#     #任务是按顺序加入列表中的
+# tpool.shutdown()
+# print('主线程')
+# #t.result()获取任务的执行的结果
+# for t in t_lst: print('***',t.result())
+# #t.result()获取的结果是按顺序的（0，1，4，9，...），因为任务是按顺序加入列表中的
+# #即任务是按顺序加入列表中的，但不一定是按顺序执行
+
+#map方法
+# from concurrent.futures import ThreadPoolExecutor
+# import time
+# def func(n):
+#     time.sleep(2)
+#     # print(n) #任务不一定是按顺序执行
+#     return n*n
+#
+# #线程池中线程的个数一般不超过cpu的个数*5
+# tpool=ThreadPoolExecutor(max_workers=5)#创建线程池
+# ret=tpool.map(func,range(20)) #返回一个迭代器
+# for i in ret:print(i)
+# tpool.shutdown()
+# print('主线程')
+
+#callback()方法
+# from concurrent.futures import ThreadPoolExecutor
+# import time
+# def func(n):
+#     time.sleep(2)
+#     print(n) #任务不一定是按顺序执行
+#     return n*n
+#
+# def call_back(m): #m.result()获取任务执行结果
+#     print('result is: %s'%m.result())
+# #线程池中线程的个数一般不超过cpu的个数*5
+# tpool=ThreadPoolExecutor(max_workers=5)#创建线程池
+# for i in range(20):
+#     t=tpool.submit(func,i).add_done_callback(call_back)
+# tpool.shutdown()
+# print('主线程')
+
+
+#进程池，（进程池的方式与线程池相同）
+# from concurrent.futures import ProcessPoolExecutor
+# import time
+# def func(n):
+#     time.sleep(2)
+#     print(n) #任务不一定是按顺序执行
+#     return n*n
+#
+# #线程池中线程的个数一般不超过cpu的个数*5
+# tpool=ProcessPoolExecutor(max_workers=5)#创建线程池
+# t_lst=[]
+# for i in range(20):
+#     t=tpool.submit(func,i)
+#     t_lst.append(t)
+#     #任务是按顺序加入列表中的
+# tpool.shutdown()
+# print('主线程')
+# #t.result()获取任务的执行的结果
+# for t in t_lst: print('***',t.result())
+
+
 
 
   
