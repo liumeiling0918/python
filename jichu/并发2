@@ -1,0 +1,209 @@
+1.# 进程池
+    # 一般进程池中的数量是cpu个数+1
+    # ret = map(func,iterable)
+        # 异步 自带close和join
+        # 所有结果的[]
+    # apply
+        # 同步的:只有当func执行完之后,才会继续向下执行其他代码
+        # ret = apply(func,args=())
+        # 返回值就是func的return
+    # apply_async
+        # 异步的:当func被注册进入一个进程之后,程序就继续向下执行
+        # apply_async(func,args=())
+        # 返回值 : apply_async返回的对象obj
+        #          为了用户能从中获取func的返回值obj.get()
+        # get会阻塞直到对应的func执行完毕拿到结果
+        # 使用apply_async给进程池分配任务,
+        # 需要先close后join来保持多进程和主进程代码的同步性
+        
+2.回调函数
+  爬虫的例子demo1:(爬取数据的长度)
+  import requests
+  from urllib.request import urlopen
+  from multiprocessing import Pool
+  # 200 网页正常的返回
+  # 404 网页找不到
+  # 502 504
+  def get(url):
+      response = requests.get(url)
+      if response.status_code == 200:
+          return url,response.content.decode('utf-8')
+
+  def get_urllib(url):
+      ret = urlopen(url)
+      return ret.read().decode('utf-8')
+
+  def call_back(args):
+      url,content = args
+      print(url,len(content))
+
+  if __name__ == '__main__':
+      url_lst = [
+          'https://www.cnblogs.com/',
+          'http://www.baidu.com',
+          'https://www.sogou.com/',
+          'http://www.sohu.com/',
+      ]
+      p = Pool(5)
+      for url in url_lst:
+          p.apply_async(get,args=(url,),callback=call_back)
+      p.close()
+      p.join()
+  爬虫的例子demo2:(爬取数据的长度)
+  import re
+  from urllib.request import urlopen
+  from multiprocessing import Pool
+  def get_page(url,pattern):
+      response=urlopen(url).read().decode('utf-8')
+      return pattern,response   # 正则表达式编译结果 网页内容
+
+  def parse_page(info):
+      pattern,page_content=info
+      res=re.findall(pattern,page_content)
+      #print(res) [(第一项),(第二项)]
+      for item in res:
+          dic={
+              'index':item[0].strip(),
+              'title':item[1].strip(),
+              'actor':item[2].strip(),
+              'time':item[3].strip(),
+          }
+          print(dic)
+  if __name__ == '__main__':
+      regex = r'<dd>.*?<.*?class="board-index.*?>(\d+)</i>.*?title="(.*?)".*?class="movie-item-info".*?<p class="star">(.*?)</p>.*?<p class="releasetime">(.*?)</p>'
+      pattern1=re.compile(regex,re.S)
+      url_dic={'http://maoyan.com/board/7':pattern1}
+      p=Pool()
+      res_l=[]
+      for url,pattern in url_dic.items():
+          res=p.apply_async(get_page,args=(url,pattern),callback=parse_page)
+          res_l.append(res)
+      for i in res_l:
+          i.get()
+          
+  3.线程：
+  import os
+  import time
+  #定义线程的两种方式
+  #第一种
+  # import time
+  # from threading import Thread
+  # def func(n):
+  #     time.sleep(1)
+  #     print(n)
+  #
+  # for i in range(10):
+  #     t=Thread(target=func,args=(i,)) #0~9 一起被打印出来 实现了多线程
+  #     t.start()
+  #第二种
+  # import time
+  # from threading import Thread
+  # class MyThread(Thread):
+  #     def __init__(self,arg):
+  #         super().__init__()
+  #         self.arg=arg
+  #     def run(self):
+  #         time.sleep(1)
+  #         print(self.arg)
+  # for i in range(10):
+  #     t=MyThread(i)
+  #     t.start() #0~9 一起被打印出来 实现了多线程
+
+  # 对于同一个进程的多个线程，他们的数据是共享的
+  import time
+  # from threading import Thread
+  # def func(a,b):
+  #     global g
+  #     g = 0
+  #     print(g,os.getpid()) #0
+  # 
+  # g = 100
+  # t_lst = []
+  # for i in range(10):
+  #     t = Thread(target=func,args=(i,5))
+  #     t.start()
+  #     t_lst.append(t)
+  # for t in  t_lst : t.join()
+  # print(g) #0
+
+
+  # 进程 是 最小的 资源分配单位（内存）
+  #进程中存放的有导入的模块，文件存放的位置，内置的函数，代码
+  #每个线程有自己的栈
+  # 线程 是 操作系统调度的最小单位
+  # 线程直接被CPU执行,进程内至少含有一个线程,也可以开启多个线程
+      # 开启一个线程所需要的时间要远远小于开启一个进程
+      # 多个线程内部有自己的数据栈,数据不共享
+      # 全局变量在多个线程之间是共享的
+  #多个线程同时对数据进行操作会造成数据的不安全，因此需要加锁GIL锁(即全局解释器锁)。
+  # GIL锁(即全局解释器锁)--锁的是线程，线程只有拿到钥匙以后才能去操作数据，同一个时刻只有有一个线程访问CPU，不能实现多线程
+  # 首先需要明确的一点是GIL并不是Python的特性，它是在实现Python解析器(CPython)时所引入的一个概念。
+  # Python也一样，同样一段代码可以通过CPython，PyPy，Psyco等不同的Python执行环境来执行。像其中的JPython就没有GIL。然而因为CPython是大部分环境下默认的Python执行环境。所以在很多人的概念里CPython就是Python，也就想当然的把GIL归结为Python语言的缺陷。
+  # 所以这里要先明确一点：GIL并不是Python的特性，Python完全可以不依赖于GIL。
+  # 简单来说，在Cpython解释器中，因为有GIL锁的存在同一个进程下开启的多线程，同一时刻只能有一个线程执行，无法利用多核优势。
+  #多线程中，python虚拟机的执行方式：
+  # a.设置GIL（全局解释器锁）相当于拿钥匙
+  # b.切换到一个线程去执行（使用CPU执行）
+  # c.运行指定数量的字节码指令或者线程主动让出执行权
+  # d.把线程设置为睡眠状态
+  # e。解锁GIL(还锁)
+  # d.重复以上步骤
+  #所以GIL锁的是线程，同一时刻只能有一个线程执行
+  # 高CPU : 计算类 --- 高CPU利用率
+  # 高IO  : 爬取网页 200个网页
+          # qq聊天   send recv
+          # 处理日志文件 读文件
+          # 处理web请求
+          # 读数据库 写数据库
+  #多进程中不能有input操作，但是多线程中可以有input操作
+  # import time
+  # from threading import Thread
+  # from multiprocessing import Process
+  # def func(n):
+  #     n + 1
+  #
+  # if __name__ == '__main__':
+  #       线程执行的时间
+  #     start = time.time()
+  #     t_lst = []
+  #     for i in range(100):
+  #         t = Thread(target=func,args=(i,))
+  #         t.start()
+  #         t_lst.append(t)
+  #     for t in t_lst:t.join()
+  #     t1 = time.time() - start
+  #     进程执行的时间
+  #     start = time.time()
+  #     t_lst = []
+  #     for i in range(100):
+  #         t = Process(target=func, args=(i,))
+  #         t.start()
+  #         t_lst.append(t)
+  #     for t in t_lst: t.join()
+  #     t2 = time.time() - start
+  #     print(t1,t2)
+  #结论 线程的执行效率更高
+  4.线程中的其他方法
+  import time
+  import threading
+  #threading.current_thread() 查看线程名
+  #threading.get_ident()查看线程id
+  def wahaha(n):
+      time.sleep(0.5)
+      print(n,threading.current_thread(),threading.get_ident()) #threading.current_thread() 打印子线程名  threading.get_ident()打印子线程id
+
+  for i in  range(10):
+      threading.Thread(target=wahaha,args=(i,)).start() #启动十个线程
+  print(threading.active_count())    # 11 查看当前所有存活的线程数量 (10子线程+1个主线程)
+  print(threading.current_thread())  #打印主线程名 <_MainThread(MainThread, started 59988)>
+  print(threading.enumerate()) #返回一个包含正在运行的线程名称的list
+  
+  
+
+
+  
+  
+
+  
+  
+  
