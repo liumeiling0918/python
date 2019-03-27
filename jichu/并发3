@@ -1,0 +1,299 @@
+1.协程
+# 进程 启动多个进程 进程之间是由操作系统负责调用
+# 线程 启动多个线程 真正被CPU执行的最小单位实际是线程
+    # 开启一个线程 创建一个线程 寄存器 堆栈
+    # 关闭一个线程
+# 协程
+    # 本质上是一个线程
+    # 能够在多个任务之间切换来节省一些IO时间
+    # 协程中任务之间的切换也消耗时间,但是开销要远远小于进程线程之间的切换
+
+# 实现并发的手段 两个任务之间来回切换 (两个函数之间来回切换执行)
+# import time
+# def consumer():
+#     while True:
+#         x = yield
+#         time.sleep(1)
+#         print('处理了数据 :',x)
+#
+# def producer():
+#     c = consumer()
+#     next(c) #切换到函数consumer
+#     for i in range(10):
+#         time.sleep(1)
+#         print('生产了数据 :',i)
+#         c.send(i) #切换到函数consumer
+#
+# producer()
+
+# 真正的协程模块就是使用greenlet完成的切换
+# from greenlet import greenlet
+# def eat():
+#     print('eating start')
+#     g2.switch()  # 切换 playing start
+#     print('eating end')
+#     g2.switch() # 切换play接着执行 playing end
+#
+# def play():
+#     print('playing start')
+#     g1.switch()  # 切换eat接着执行 eating end
+#     print('playing end')
+#
+# g1=greenlet(eat)
+# g2=greenlet(play)
+# g1.switch() #切换 eating start
+
+#结果为：eating start
+#       playing start
+#       eating end
+#       playing end
+
+
+# 进程和线程的任务切换由操作系统完成
+# 协程任务之间的切换由程序(代码)完成,只有遇到协程模块能识别的IO操作的时候,程序才会进行任务切换,实现并发的效果
+# 协程 : 能够在一个线程中实现并发效果的概念
+    #    能够规避一些任务中的IO操作
+    #    在任务的执行过程中,检测到IO就切换到其他任务
+
+from gevent import monkey;monkey.patch_all()
+import time
+import gevent
+import threading
+def eat():
+    print(threading.current_thread().getName())
+    print(threading.current_thread())
+    print('eating start')
+    time.sleep(1)
+    print('eating end')
+
+def play():
+    print(threading.current_thread().getName())
+    print(threading.current_thread())
+    print('playing start')
+    time.sleep(1)
+    print('playing end')
+
+g1 = gevent.spawn(eat)
+g2 = gevent.spawn(play)
+# g1.join() #join()方法在主进程结束之前执行该方法,否则会发生主进程执行结束,该协程也跟着结束,而协程的任务并没有执行完成
+# g2.join()
+
+
+
+# # 同步 和 异步
+# from gevent import monkey;monkey.patch_all()
+# import time
+# import gevent
+#
+# def task(n):
+#     time.sleep(1)
+#     print(n)
+#
+# def sync():
+#     for i in range(10):
+#         task(i)
+#
+# def async():
+#     g_lst = []
+#     for i in range(10):
+#         g = gevent.spawn(task,i) #spawn 造成
+#         g_lst.append(g)
+#     gevent.joinall(g_lst)  # for g in g_lst:g.join()
+#
+# sync() #同步 一个一个打印
+# async() #异步 同时打印
+
+
+
+
+# 多线程 被弱化了
+# 协程 在一个线程上 提高CPU 的利用率
+# 协程相比于多线程的优势 切换的效率更快
+
+# 爬虫的例子
+# 请求过程中的IO等待
+from gevent import monkey;monkey.patch_all()
+import gevent
+from urllib.request import urlopen    # 内置的模块
+def get_url(url):
+    response = urlopen(url)
+    content = response.read().decode('utf-8') #io等待
+    return len(content)
+
+g1 = gevent.spawn(get_url,'http://www.baidu.com') #spawn 生产 提交任务
+g2 = gevent.spawn(get_url,'http://www.sogou.com')
+g3 = gevent.spawn(get_url,'http://www.taobao.com')
+g4 = gevent.spawn(get_url,'http://www.hao123.com')
+g5 = gevent.spawn(get_url,'http://www.cnblogs.com')
+gevent.joinall([g1,g2,g3,g4,g5])
+print(g1.value)
+print(g2.value)
+print(g3.value)
+print(g4.value)
+print(g5.value)
+# #同时打印各个网址内容的长度
+
+
+#爬虫的例子
+# 方式一
+# from urllib.request import  urlopen
+# ret=urlopen('http://www.baidu.com')
+# print(ret.read().decode('utf-8')) #有格式的
+
+#方式二
+import requests
+# ret2=requests.get('http://www.baidu.com')
+# print(ret2.content.decode('utf-8')) #无格式的
+
+
+2.协程实现socket
+server端：
+from gevent import monkey;monkey.patch_all()
+import socket
+import gevent
+sk=socket.socket()
+sk.bind(('127.0.0.1',8080))
+sk.listen()
+def talk(conn): #收发信息
+    conn.send(b'hello')
+    print(conn.recv(1024).decode('utf-8'))
+    conn.close()
+while True: #主进程为while程序，一直不会停止 所以协程可以一直被执行
+    conn,addr=sk.accept() #建立连接
+    gevent.spawn(talk,conn)
+sk.close()
+
+client端:
+import socket
+sk = socket.socket()
+sk.connect(('127.0.0.1',8080))
+print(sk.recv(1024))
+msg = input('>>>').encode('utf-8')
+sk.send(msg)
+sk.close()
+
+3.非阻塞IO
+server端：
+#简单版
+# import  socket
+# sk=socket.socket()
+# sk.bind(('127.0.0.1',9000))
+# sk.setblocking(False)
+# sk.listen()
+# while True:
+#     try:
+#         conn,addr=sk.accept() ##不阻塞,但是没连接时会报错
+#         print('建立了连接')
+#         ret=conn.recv(1024) #不阻塞,但是没有消息接收时会报错
+#     except BlockingIOError:pass
+
+
+#复杂版
+# import socket
+# sk = socket.socket()
+# sk.bind(('127.0.0.1',9000))
+# sk.setblocking(False)#设置为非阻塞
+# sk.listen()
+# conn_l = []
+# del_conn = []
+# #有人连接时，则处理连接
+# #没有人连接时，则进入except代码中，处理收发信息
+# while True:
+#     try:
+#         conn,addr = sk.accept()  #不阻塞,但是没连接时会报错
+#         print('建立连接了:',addr)
+#         conn_l.append(conn)
+#     except BlockingIOError:
+#         for con in conn_l:
+#             try:
+#                 msg = con.recv(1024)  # 非阻塞,如果没有数据就报错
+#                 if msg == b'':
+#                     del_conn.append(con)
+#                     continue
+#                 print(msg)
+#                 con.send(b'byebye')
+#             except BlockingIOError:pass
+#         for con in del_conn:
+#             con.close()
+#             conn_l.remove(con)
+#         del_conn.clear()
+# while True : 10000   500  501
+client端:
+import time
+import socket
+import threading
+def func():
+    sk = socket.socket()
+    sk.connect(('127.0.0.1',9000))
+    sk.send(b'hello')
+    time.sleep(1)
+    print(sk.recv(1024))
+    sk.close()
+
+for i in range(2):
+    threading.Thread(target=func).start()
+    
+4.IO多路复用
+server端
+#IO多路复用
+# IO多路复用，多路复用的方式select，poll,epoll 通过selector自动选择多路复用的方式
+    # select机制  Windows  linux  操作系统轮询每一个被监听的项,查看是否有要监听的动作发生
+    # poll机制    linux          它可以监听的对象比select机制可以监听的多
+    #操作系统轮询每一个被监听的项,查看是否有要监听的动作发生。 随着监听项的增多,导致效率降低
+    # epoll机制   linux  给每个监听的对象绑定一个回调函数，当监听的事件发生时，直接通过回调函数返回给用户
+# sk=socket.socket()
+# sk.bind(('127.0.0.1',8088))
+# sk.listen(5)
+# sk.setblocking(False) #设置socket的接口为非阻塞
+# sel=selectors.DefaultSelector()   # 选择一个适合我的IO多路复用的机制
+# sel.register(sk,selectors.EVENT_READ,accept)
+# #相当于网select的读列表里append了一个sk对象,并且绑定了一个回调函数accept
+# # 说白了就是 如果有人请求连接sk,就调用accrpt方法
+
+import select
+import socket
+sk=socket.socket()
+sk.bind(('127.0.0.1',8080))
+sk.setblocking(False)
+sk.listen()
+
+read_lst=[sk]
+while True:
+    r_lst,w_lst,x_lst=select.select(read_lst,[],[]) #监听器 返回值为三个列表 列表中的内容分别为监听到的元素
+    # select.select(readlist,writelist,xlist)
+    # readlist该列表中存放需要监听的可读元素
+    # writelist 该列表中存放需要监听的可写元素
+    # xlist 该列表中存放监听条件
+    print(r_lst)
+    for i in r_lst:
+        if i is sk:#监听到的是sk
+            conn,addr=i.accept() #第一次监听到的是sk
+            read_lst.append(conn)
+        else:#监听到的是conn
+            ret=i.recv(1024)
+            if ret==b'': #接收的是空消息，则关闭该连接 并停止监听
+                i.close()
+                read_lst.remove(i)
+                continue
+            print(ret)
+            i.send(b'bye')
+client端：
+import time
+import socket
+import threading
+def func():
+    sk = socket.socket()
+    sk.connect(('127.0.0.1',8080))
+    sk.send(b'hello')
+    time.sleep(3)
+    print(sk.recv(1024))
+    sk.close()
+
+for i in range(20):#开启20个线程
+    threading.Thread(target=func).start()
+
+
+
+
+
+
