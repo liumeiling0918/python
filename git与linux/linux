@@ -1,0 +1,105 @@
+1.转换成root权限 su root
+2.查看ip地址：ifconfig
+3.主机名：hostname
+4.防火墙：service iptables status
+5.source:不用重启便可以编辑成功
+6.查看进程 ps -ef|grep redis
+7.列出所有打开了网络套接字 lsof -i:6379
+8.pwd 显示当前工作目录（print working directory）
+9.ls -l 长格式的形式查看当前目录下所有可见文件的详细属性
+10.rm -f 文件名 删除某个文件
+11.UGO rwx (User Group Other) 读写执行（777）
+12.dd 删除本行
+13.grep（global search regular expression(RE)文本搜索工具，
+14.echo命令的功能是在显示器上显示一段文字
+15.ps命令用于报告当前系统的进程状态
+-a：显示所有终端机下执行的程序，除了阶段作业领导者之外
+-f：显示UID,PPIP,C与STIME栏位
+-A：显示所有程序。
+-e：此选项的效果和指定"A"选项相同。
+pidof命令用于查找指定进程的进程号id号。
+16.su命令用于切换当前用户身份到其他用户身份
+su root 切换到root用户
+17.tr命令可以对来自标准输入的字符进行替换、压缩和删除
+替换
+echo "HELLO WORLD"|tr 'A-Z' 'a-z'
+hello world
+删除
+echo "hello 123 world 456" | tr -d '0-9'
+hello  world 
+压缩 tar -cvf 
+18关机和重启命令 shutdown
+指定现在立即关机：shutdown -h now
+关机后立刻重启：shutdown -r now
+shutdown -r/h 时间 例如： shutdown -h 11:50
+halt命令用来关闭正在运行的Linux操作系统。halt命令会先检测系统的runlevel，若runlevel为0或6，则关闭系统，否则即调用shutdown来关闭系统。
+19.lsof即可显示系统打开的文件 list open file
+20.touch命令有两个功能：用来创建新的空文件或者把已存在文件的时间标签更新为系统当前的时间（默认方式），它们的数据将原封不动地保留下来；
+1.ls -l 显示文件属性及文件的拥有者，文件所在组
+drwxrwxr-x. 2 lml lml 4096 Aug 22 18:58 file
+文件类型，拥有者权限，同组用户权限，其他用户权限
+2.  chgrp：更改文件属组 
+chgrp [-R] 属组名 文件名
+chown :更改文件拥有者
+chown [–R] 属主名 文件名
+chown [-R] 属主名：属组名 文件名
+chmod owner/group/others 
+ chmod [-R] 777 文件或目录   
+  chmod u=rwx,g=rx,o=r  file
+user,group,other,all,(+,-,=)
+例如删除所有用户的执行权限
+chmod a-x test1
+
+打开文件、保存、关闭文件(vim命令模式下使用)
+命令的使用请先按ESC进入命令模式！
+vim filename        //打开filename文件 
+
+:w                  //保存文件 
+:w vpser.net       //保存至vpser.net文件 
+:q                //退出编辑器，如果文件已修改请使用下面的命令 
+:q!              //退出编辑器，且不保存 
+:wq            //退出编辑器，且保存文件 
+:x            //退出编辑器，且保存文件 
+修改：Insert键
+--------------------------------------------------------------------------------
+插入文本或行(vim命令模式下使用，执行下面命令后将进入插入模式，按ESC键可退出插入模式)
+a        //在当前光标位置的右边添加文本 
+i       //在当前光标位置的左边添加文本 
+A       //在当前行的末尾位置添加文本 
+I      //在当前行的开始处添加文本(非空字符的行首) 
+O      //在当前行的上面新建一行 
+o     //在当前行的下面新建一行 
+R     //替换(覆盖)当前光标位置及后面的若干文本 
+J    //合并光标所在行及下一行为一行(依然在命令模式) 
+x  //删除当前光标处的字符
+dd //删除本行
+w//下一个单词
+dw//删除下一个单词
+D//删除至行尾
+
+压缩与解压：
+-c: 压缩 
+-x：解压
+-z：有gzip属性的 
+-j：有bz2属性的 
+-Z：有compress属性的 
+-v：显示所有过程 
+解压：
+tar –xvf file.tar //解压 tar包 
+tar -xzvf file.tar.gz //解压tar.gz 
+tar -xjvf file.tar.bz2 //解压 tar.bz2 
+tar –xZvf file.tar.Z //解压tar.Z 
+unrar e file.rar //解压rar 
+unzip file.zip //解压zip 
+总结
+1、*.tar 用 tar –xvf 解压 
+2、*.gz 用 gzip -d或者gunzip 解压 
+3、*.tar.gz和*.tgz 用 tar –xzf 解压 
+4、*.bz2 用 bzip2 -d或者用bunzip2 解压 
+5、*.tar.bz2用tar –xjf 解压 
+6、*.Z 用 uncompress 解压 
+7、*.tar.Z 用tar –xZf 解压 
+8、*.rar 用 unrar e解压 
+9、*.zip 用 unzip 解压
+压缩 tar -cvf jpg.tar *.jpg /将目录里所有jpg文件打包成tar.jpg 
+
