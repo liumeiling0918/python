@@ -54,6 +54,10 @@ chmod a-x test1
 命令的使用请先按ESC进入命令模式！
 vim filename        //打开filename文件 
 
+/ 向前查找
+？向后查找
+n 向前一个
+N 向后一个
 :w                  //保存文件 
 :w vpser.net       //保存至vpser.net文件 
 :q                //退出编辑器，如果文件已修改请使用下面的命令 
@@ -76,6 +80,15 @@ dd //删除本行
 w//下一个单词
 dw//删除下一个单词
 D//删除至行尾
+
+touch filename 
+若文件存在，则将文件时间更新为当前时间；若文件不存在，则创建文件
+echo "messgae"
+echo "messgae" >> f1  将内容输入到f1
+从窗口中读取用户输入内容
+read name
+等待用户输入姓名
+echo "$name">>f1
 
 压缩与解压：
 -c: 压缩 
