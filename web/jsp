@@ -256,6 +256,14 @@ foo();  // 执行后的结果是？
 //     console.log("呵呵");
 //   }
 //18
+var age=18;
+function foo(age){
+   console.log(age);
+   var age=22;
+   console.log(age);
+   }
+foo(1);
+结果为 1 22
 对象：
 // JS中自定义对象
 
