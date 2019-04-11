@@ -1,0 +1,93 @@
+1.点击圆形则变色
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>样式操作示例</title>
+    <style>
+        .c1 {
+            height: 200px;
+            width: 200px;
+            border-radius: 50%;
+            background-color: red;
+        }
+        .c2 {
+            background-color: green;
+        }
+    </style>
+</head>
+<body>
+
+<div class="c1"></div>
+
+<script src="jquery-3.2.1.min.js"></script>
+<script>
+    // 找标签
+    $("div.c1").click(function () {
+        // console.log(this);  // this是DOM对象
+        $(this).toggleClass("c2"); // 有就删掉 没有就加上
+        //相当于jsp的this.classList.toggle("c2");
+    })
+</script>
+</body>
+</html>
+2.<!--点击哪个菜单就显示菜单的具体列表-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="x-ua-compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>左侧菜单示例</title>
+  <style>
+      
+    .hide {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="left">
+  <div class="menu">
+    <div class="title">菜单一</div>
+    <div class="items">
+      <div class="item">111</div>
+      <div class="item">222</div>
+      <div class="item">333</div>
+    </div>
+
+    <div class="title">菜单二</div>
+    <div class="items hide">
+      <div class="item">111</div>
+      <div class="item">222</div>
+      <div class="item">333</div>
+    </div>
+
+    <div class="title">菜单三</div>
+    <div class="items hide">
+      <div class="item">111</div>
+      <div class="item">222</div>
+      <div class="item">333</div>
+    </div>
+  </div>
+</div>
+<div class="right"></div>
+<script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+
+<script>
+    // 1. 找到所有的.menu-items, 隐藏
+    // 2. 找到当前点击菜单下面的.menu-items,把它显示出来(移除hide类)
+  $(".title").click(function (){  // jQuery绑定事件
+    // 隐藏所有class里有.items的标签
+    $(".items").addClass("hide");  //批量操作
+    $(this).next().removeClass("hide");
+  });
+
+    // 1. 找到当前点击菜单下面的.menu-items,把它显示出来(移除hide类)
+//    // 2. 把其他的.menu-items隐藏,添加hide类
+//    $(".title").click(function () {
+//        $(this).next().removeClass("hide");
+//        $(this).siblings(".title").next().addClass("hide");
+//    });
+</script>
