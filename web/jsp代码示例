@@ -1,0 +1,103 @@
+1.定时器
+<!--模仿一个定时器，点击开始按钮则每秒钟更新时间，点击停止按钮则停止更新时间-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>定时器</title>
+</head>
+<body>
+<input type="text" id="d1">
+<input type="button" id="start" value="开始">
+<input type="button" id="stop" value="结束">
+<script>
+    //声明一个全局变量，定义定时器
+    var t;
+    function foo() {
+        var now=new Date();
+        var nowstr=now.toLocaleString();
+        var de=document.getElementById("d1");
+        de.value=nowstr;
+    }
+    //点击开始按钮，启动定时器
+    var startE=document.getElementById("start");
+    startE.onclick=function () {
+        foo();
+        if (t===undefined){//为了只使用一个定时器
+            t=setInterval(foo,1000);
+        }
+    }
+    //点击结束按钮，停止定时器
+    var stopE=document.getElementById("stop");
+    stopE.onclick=function () {
+        clearInterval(t);
+        console.log(t);//1
+        t=undefined;
+
+    }
+</script>
+</body>
+</html>
+2.
+<!--实现搜索框：当点击该文本框时，清除文本框中的默认内容；当鼠标离开文本框时，恢复文本框的默认内容-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>搜索框示例</title>
+</head>
+<body>
+<input type="text" id="i1" value="please input">
+<input type="button" value="搜索">
+
+<script>
+    var ie=document.getElementById("i1");
+    //当点击该文本框时，清除文本框中的默认内容；
+    ie.onfocus=function () {
+        this.value=""
+    };
+    // 当鼠标离开文本框时，恢复文本框的默认内容
+    ie.onblur=function () {
+        if (!this.value.trim()){
+         this.value="please input"
+        }
+    }
+</script>
+</body>
+</html>
+3.<!--根据用户的选择，动态选择下一级下拉框-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>select联动示例</title>
+</head>
+<body>
+<select name="" id="s1">
+    <option value="0">--请选择--</option>
+    <option value="1">北京</option>
+    <option value="2">上海</option>
+</select>
+
+<select name="" id="s2">
+</select>
+<script>
+    var data = {1: ["昌平区", "朝阳区", "海淀区"], 2: ["静安区", "闵行区", "浦东区"]};
+    var s1=document.getElementById("s1");
+    s1.onchange=function () {
+        //获取城市
+        console.log(this.value);
+        //根据城市显示下一级下拉框
+        var areas=data[this.value];
+        var s2=document.getElementById("s2");
+        s2.innerHTML="";//清除上一次选择的标签内容
+       for(var i=0;i<areas.length;i++){
+           var opE=document.createElement("option");
+           opE.innerText=areas[i];
+           s2.appendChild(opE);
+       }
+        
+    }
+</script>
+</body>
+</html>
