@@ -101,3 +101,40 @@
 </script>
 </body>
 </html>
+
+3.<!--根据用户的选择，动态选择下一级下拉框-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>select联动示例</title>
+</head>
+<body>
+<select name="" id="s1">
+    <option value="0">--请选择--</option>
+    <option value="1">北京</option>
+    <option value="2">上海</option>
+</select>
+
+<select name="" id="s2">
+</select>
+<script>
+    var data = {1: ["昌平区", "朝阳区", "海淀区"], 2: ["静安区", "闵行区", "浦东区"]};
+    var s1=document.getElementById("s1");
+    s1.onchange=function () {
+        //获取城市
+        console.log(this.value);
+        //根据城市显示下一级下拉框
+        var areas=data[this.value];
+        var s2=document.getElementById("s2");
+        s2.innerHTML="";//清除上一次选择的标签内容
+       for(var i=0;i<areas.length;i++){
+           var opE=document.createElement("option");
+           opE.innerText=areas[i];
+           s2.appendChild(opE);
+       }
+
+    }
+</script>
+</body>
+</html>
