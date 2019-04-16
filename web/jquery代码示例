@@ -91,3 +91,341 @@
 //        $(this).siblings(".title").next().addClass("hide");
 //    });
 </script>
+3.<!--点击按钮则显示背景以及模块框，不点击则隐藏-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>自定义模态框示例</title>
+    <style>
+        .cover {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background-color: rgba(0,0,0,0.4);
+            z-index: 998;
+        }
+
+        .modal {
+            height: 400px;
+            width: 600px;
+            background-color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-left: -300px;
+            margin-top: -200px;
+            z-index: 1000;
+        }
+        .hide {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<button id="b1">屠龙宝刀,点击就送!</button>
+<div class="cover hide"></div> <!--点击按钮时，整个背景变色-->
+<div class="modal hide">
+    <form>
+        <p>
+            <label>用户名:
+                <input type="text">
+            </label>
+        </p>
+        <p>
+            <label>密码:
+                <input type="password">
+            </label>
+        </p>
+        <p>
+            <input type="submit" value="登录">
+            <input id="cancel" type="button" value="取消">
+        </p>
+    </form>
+</div>
+<script src="jquery-3.2.1.min.js"></script>
+<script>
+    // 找到点击弹出模态框的按钮
+    $("#b1").click(function () {
+        // 把.cover和.modal显示出来(去除掉.hide)
+        $(".cover").removeClass("hide");  // 显示背景
+        $(".modal").removeClass("hide"); // 显示模态框
+    });
+
+    // 找到取消按钮,绑定事件
+    $("#cancel").click(function () {
+        // 给背景和模态框都加上hide类
+        $(".cover").addClass("hide");
+        $(".modal").addClass("hide");
+    })
+</script>
+</body>
+</html>
+4. <!--把当前点击的标签变绿-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>修改CSS样式</title>
+</head>
+<body>
+
+<p>乔小强</p>
+<p>二哥</p>
+<script src="jquery-3.2.1.min.js"></script>
+<script>
+    $("p").click(function () {
+        // 把当前点击的标签变绿
+        // 在处理事件的函数中用 this 表示 当前触发事件的标签
+//        $(this).css("color", "red");
+//        $(this).css("font-size", "24px");
+
+        $(this).css({"color": "pink", "font-size": "48px"});
+    })
+</script>
+</body>
+</html>
+
+5.<!--窗口滑动一定距离时则显示返回顶部按钮，且点击该按钮则返回顶部-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="x-ua-compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>位置相关示例之返回顶部</title>
+  <style>
+       * {
+           margin: 0;
+       }
+    .c1 {
+      width: 100px;
+      height: 200px;
+      background-color: red;
+    }
+
+    .c2 {
+      height: 50px;
+      width: 50px;
+
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      background-color: #2b669a;
+    }
+    .hide {
+      display: none;
+    }
+    .c3 {
+      height: 100px;
+    }
+  </style>
+</head>
+<body>
+<button id="b1" class="btn btn-default">点我</button>
+<div class="c1"></div>
+<div class="c3">1</div>
+<div class="c3">2</div>
+<div class="c3">3</div>
+<div class="c3">4</div>
+<div class="c3">5</div>
+<div class="c3">6</div>
+<div class="c3">7</div>
+<div class="c3">8</div>
+<div class="c3">9</div>
+<div class="c3">10</div>
+<div class="c3">11</div>
+<div class="c3">12</div>
+<div class="c3">13</div>
+<div class="c3">14</div>
+<div class="c3">15</div>
+<div class="c3">16</div>
+<div class="c3">17</div>
+<div class="c3">18</div>
+<div class="c3">19</div>
+<div class="c3">20</div>
+<div class="c3">21</div>
+<div class="c3">22</div>
+<div class="c3">23</div>
+<div class="c3">24</div>
+<div class="c3">25</div>
+<div class="c3">26</div>
+<div class="c3">27</div>
+<div class="c3">28</div>
+<div class="c3">29</div>
+<div class="c3">30</div>
+<div class="c3">31</div>
+<div class="c3">32</div>
+<div class="c3">33</div>
+<div class="c3">34</div>
+<div class="c3">35</div>
+<div class="c3">36</div>
+<div class="c3">37</div>
+<div class="c3">38</div>
+<div class="c3">39</div>
+<div class="c3">40</div>
+<div class="c3">41</div>
+<div class="c3">42</div>
+<div class="c3">43</div>
+<div class="c3">44</div>
+<div class="c3">45</div>
+<div class="c3">46</div>
+<div class="c3">47</div>
+
+<button id="b2" class="btn btn-default c2 hide">返回顶部</button>
+<script src="jquery-3.2.1.min.js"></script>
+<script>
+  $(window).scroll(function () {
+    if ($(window).scrollTop() > 100) {
+      $("#b2").removeClass("hide");
+    }else {
+      $("#b2").addClass("hide");
+    }
+  });
+  $("#b2").click(function () {
+    $(window).scrollTop(0);
+  })
+</script>
+</body>
+</html>
+6. <!--   // 点击登录按钮验证用户名和密码为不为空
+    // 为空就在对应的input标签下面显示一个错误提示信息-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>文档操作</title>
+    <style>
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+<!--<div id="d1">
+    <p><span>span</span></p>
+    <div>div</div>
+</div>-->
+
+
+<form id="f1">
+        <p>
+            <label>用户名:
+                <input class="need" name="username" type="text">
+                <span class="error"></span>
+            </label>
+        </p>
+        <p>
+            <label>密码:
+                <input class="need" name="password" type="password">
+                <span class="error"></span>
+            </label>
+        </p>
+
+        <p>爱好:
+            <label>篮球
+                <input name="hobby" value="basketball" type="checkbox">
+            </label>
+            <label>足球
+                <input name="hobby" value="football" type="checkbox">
+            </label>
+            <label>双色球
+                <input name="hobby" value="doublecolorball" type="checkbox">
+            </label>
+        </p>
+
+    <p>性别:
+            <label>男
+                <input name="gender" value="1" type="radio">
+            </label>
+            <label>女
+                <input name="gender" value="0" type="radio">
+            </label>
+            <label>保密
+                <input name="gender" value="2" type="radio">
+            </label>
+        </p>
+
+    <p>
+        <label for="s1">从哪儿来:</label>
+        <select name="from" id="s1">
+            <option value="010">北京</option>
+            <option value="021">上海</option>
+            <option value="020">广州</option>
+        </select>
+    </p>
+      <p>
+        <label for="s2">从哪儿来:</label>
+        <select name="from" id="s2" multiple>
+            <option value="010">北京</option>
+            <option value="021">上海</option>
+            <option value="020">广州</option>
+            <option value="0755">深圳</option>
+        </select>
+    </p>
+    <p>
+        <label for="t1">个人简介:</label>
+        <textarea name="memo" id="t1" cols="30" rows="10">
+
+        </textarea>
+    </p>
+        <p>
+            <input id="b1" type="submit" value="登录">
+            <input id="cancel" type="button" value="取消">
+        </p>
+    </form>
+<script src="jquery-3.2.1.min.js"></script>
+<script>
+    $("#b1").click(function () {
+        var $needEles = $(".need");
+        for (var i=0;i<$needEles.length;i++){
+            if ($($needEles[i]).val().trim().length === 0) {
+                //获取label标签的内容
+                var labelName = $($needEles[i]).parent().text().trim().slice(0,2);
+                //  给span标签添加内容
+                $($needEles[i]).next().text( labelName +"不能为空!");
+
+            }
+        }
+        return false;
+    })
+
+</script>
+</body>
+</html>
+7.<!--标签的属性替换，点击更换图片进行图片的替换-->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>属性操作</title>
+</head>
+<body>
+
+<img src="http://image11.m1905.cn/uploadfile/s2010/0205/20100205083613178.jpg" alt="">
+<input type="button" id="b1" value="更换图片">
+
+
+<input checked type="checkbox" id="c1">
+<input type="checkbox" id="c2">
+
+<script src="jquery-3.2.1.min.js"></script>
+<script>
+    var oldURL;
+    var newURL = "http://img01.yohoboys.com/contentimg/2017/08/12/21/012a1eab9842a752f8c4d98b8fc2777ad7.jpg";
+    $("#b1").click(function () {
+        var $imgEles = $("img");
+        // 修改img标签的src属性
+        oldURL = $imgEles.attr("src");
+        $imgEles.attr("src", newURL);
+        newURL = oldURL;
+    });
+
+</script>
+</body>
+</html>
+
+8.
