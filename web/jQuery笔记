@@ -168,4 +168,37 @@
 						 $("a").attr({"href":"http://www.sogo.com", "title": "aaaa"}) 
 						 
 		2. .prop()   --> 适用于checkbox和radio(返回true或false的属性)
+	6. 我们今后要用的jQuery绑定事件的方式
+			.on("click", function(){...})
+			
+			$("#t1").on("click", "选择器", function(){...})
+			适用于 给未来的元素(页面生成的时候还没有的标签) 绑定事件 (事件委托)
+			
+			事件冒泡和事件捕获
+				利用事件冒泡,给已经存在的标签绑定事件,用来捕获后代标签的事件.
+
+			
+		3. 事件之间
+			1. 阻止后续事件的执行
+				显式的写   return false;  
+			2. for循环,退出当前循环 ---> 用break;
+			
+		4. 补充一个键盘事件
+			示例:批量操作的
+		5. DOM加载完之后执行
+			$(document).ready(function(){
+			  // 写绑定事件的具体操作
+			});
+		6. 动画(了解即可)
+		
+	7. jQuery补充
+		1. .each循环
+			1. $.each(a1, function(){...})
+			2. $("div").each(function(){
+			    console.log(this);   --> this指的是每次进入循环的标签
+			})
+		2. .data
+			1. 可以存字符串
+			2. 可以存数字
+			3. 可以存jQuery对象
     
