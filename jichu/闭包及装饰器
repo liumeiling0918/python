@@ -52,9 +52,9 @@ func()   #inner()
             print('全体放假%s天'%day)
             return '好开心'
 
-        print(holiday.__name__) 结果为holiday
-        2.在inner上未添加@wraps(func)
         print(holiday.__name__) 结果为inner
+        2.在inner上未添加@wraps(func)
+        print(holiday.__doc__)则被装饰函数中的注释可以被打印出 这是一个放假通知
 4.#可根据业务要求动态的决定是否装饰函数
       import time
       def timer_out(FLAG):
