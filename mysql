@@ -1,7 +1,15 @@
 基本的sql语句：
 1.select * from userinfo where id=1;
 2.insert into userinfo(username,password) values ("daliu","13d");
-3.update 
+3.update userinfo set password="123" WHERE id=1
+4.delete from userinfo WHERE id="123"
+
+1.mysql的一些命令：
+mysql -uroot -p
+show dabases;
+use basename;
+show tables;
+exit;
 创建表的语句：
 CREATE TABLE userinfo
 (
