@@ -1,0 +1,184 @@
+基本的sql语句：
+1.select * from userinfo where id=1;
+2.insert into userinfo(username,password) values ("daliu","13d");
+3.update 
+创建表的语句：
+CREATE TABLE userinfo
+(
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username CHAR(10) NULL,
+  password CHAR(20) NULL,
+  CONSTRAINT username
+  UNIQUE (username)
+);
+
+#1.pymysql的简单例子：
+import pymysql
+conn=pymysql.connect(
+    host="localhost",
+    port=3306,
+    database="info",
+    user="root",
+    password="123456",
+    charset="utf8"
+)
+cursor=conn.cursor()
+sql="select * from userinfo;"
+ret=cursor.execute(sql)#返回的是记录的条数
+print(ret)
+cursor.close()
+conn.close()
+
+2.#验证用户信息的正确性
+import pymysql
+username=input("please input the name")
+password=input("please input the password")
+conn=pymysql.connect(
+    host="localhost",
+    port=3306,
+    database="info",
+    user="root",
+    password="123456",
+    charset="utf8"
+)
+cursor=conn.cursor()
+sql="select * from userinfo WHERE username='%s' and password='%s'"%(username,password)
+ret=cursor.execute(sql)
+if ret:
+    print("success")
+else:
+    print("fail")
+#注意：按程序会引起sql注入，例如用户输入xiaoqiang'-- (当用户名正确时便可登陆成功)
+    # 或者 alex'or 1==1 --(当用户名不正确时也可登陆成功)
+    
+3.#验证用户信息的正确性（规避sql注入）
+import pymysql
+username=input("please input the name")
+password=input("please input the password")
+conn=pymysql.connect(
+    host="localhost",
+    port=3306,
+    database="info",
+    user="root",
+    password="123456",
+    charset="utf8"
+
+)
+cursor=conn.cursor()
+sql="select * from userinfo where username=%s and password=%s"
+ret=cursor.execute(sql,[username,password])
+if ret:
+    print("登录成功")
+else:
+    print("登录失败！")
+    
+4.#pymql的增加操作
+import pymysql
+conn=pymysql.connect(
+    host="localhost",
+    port=3306,
+    database="info",
+    user="root",
+    password="123456",
+    charset="utf8"
+)
+cursor=conn.cursor()
+sql="insert into userinfo(username, password) VALUES (%s,%s)"
+try:
+    cursor.execute(sql,["daxiang11","12333"])
+    conn.commit()
+    id=cursor.lastrowid# 获取刚插入数据的ID值
+    print(id)
+except Exception as e:
+    print("报错了"+str(e))
+    conn.rollback()
+
+cursor.close()
+conn.close()
+
+5.#批量插入数据
+import pymysql
+conn=pymysql.connect(
+    host="localhost",
+    port=3306,
+    database="info",
+    user="root",
+    password="123456",
+    charset="utf8"
+)
+
+cursor=conn.cursor()
+sql="insert into userinfo(username, password) VALUES (%s,%s)"
+data=[("alex22", "dashabi") ,("xiaoyima333", "nvshen")]
+try:
+    cursor.executemany(sql,data) #批量操作,有一条数据插入不成功则批量插入的数据都失败
+    #等价于
+    # for i in data:
+    #     cursor.execute(sql,i)
+    conn.commit()
+except Exception as e:
+    print("ERROR"+str(e))
+    conn.rollback()
+
+cursor.close()
+conn.close()
+
+6.#删除数据
+import pymysql
+conn=pymysql.connect(
+    host="localhost",
+    port=3306,
+    database="info",
+    user="root",
+    password="123456",
+    charset="utf8"
+)
+cursor=conn.cursor()
+sql="delete from userinfo WHERE id=%s"
+try:
+    cursor.execute(sql,1)
+    conn.commit()
+except Exception as e:
+    print(str(e))
+cursor.close()
+conn.close()
+
+7.#修改数据
+import pymysql
+conn=pymysql.connect(
+    host="localhost",
+    port=3306,
+    database="info",
+    user="root",
+    password="123456",
+    charset="utf8"
+)
+cursor=conn.cursor()
+sql="update userinfo set password=%s WHERE id=%s"
+try:
+    cursor.execute(sql,["lll",2])
+    conn.commit()
+except Exception as e:
+    print(e)
+cursor.close()
+conn.close()
+
+8.#查询数据的各种方式
+#删除数据
+import pymysql
+conn=pymysql.connect(
+    host="localhost",
+    port=3306,
+    database="info",
+    user="root",
+    password="123456",
+    charset="utf8"
+)
+cursor=conn.cursor(cursor=pymysql.cursors.DictCursor)# 指定返回的数据格式为字典格式
+sql="select * from userinfo;"
+cursor.execute(sql)  # 返回的是受影响的行数 6
+# cursor.fetchall() # # 返回所有的数据
+cursor.fetchone() #返回当前游标指向的数据
+# cursor.fetchmany(3) #返回当前游标指向及其向后的三条数据
+# ret=cursor.scroll(0,mode="absolute") #绝对移动，从第一条数据开始偏移
+ret=cursor.scroll(1,mode="relative")#相对移动，从游标位置处开始偏移
