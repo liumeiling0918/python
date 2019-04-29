@@ -1,0 +1,44 @@
+1.models中的创建表语句
+from django.db import models
+
+# ORM相关的只能写在这个文件里,写到别的文件里Django找不到
+
+class UserInfo(models.Model):
+    id = models.AutoField(primary_key=True)  # 创建一个自增的主键字段
+    name = models.CharField(null=False, max_length=32)   # 创建一个varchar(20)类型的不能为空的字段
+
+    def __str__(self):
+        return "<{}-{}>".format(self.id, self.name)
+
+
+# Book表
+class Book(models.Model):
+    id = models.AutoField(primary_key=True)  # 创建一个自增的主键字段
+    title = models.CharField(max_length=64, null=False)
+    
+   2.操作数据库
+   查询 models.UserInfo.objects.all()
+   插入models.UserInfo.objects.create(name=new_name)
+   
+   2.1# 展示所有的用户的函数
+      def user_list(request):
+          # 去数据库中查询所有的用户
+          # 利用ORM这个工具去查询数据库,不用自己去查询
+          ret = models.UserInfo.objects.all()  # [UserInfo Object, UserInfo Object]
+          print(ret[0].id, ret[0].name)
+          # 打开user_list.html文件,
+          return render(request, "user_list.html", {"user_list": ret})
+
+        
+    2.2# 添加用户的函数
+        def add_user(request):
+            if request.method == "POST":
+                # 用户填写了新的用户名,并发送了POST请求过来
+                new_name = request.POST.get("username", None)
+                # 去数据库中新创建一条用户记录
+                models.UserInfo.objects.create(name=new_name)
+                # return HttpResponse("添加成功!")
+                # 添加成功后直接跳转到用户列表页
+                return redirect("/user_list/")
+            # 第一个请求页面的时候,就返回一个页面,页面上有两个框让用户填写
+            return render(request, "add_user.html")
