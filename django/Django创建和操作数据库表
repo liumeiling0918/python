@@ -19,6 +19,10 @@ class Book(models.Model):
    2.操作数据库
    查询 models.UserInfo.objects.all()
    插入models.UserInfo.objects.create(name=new_name)
+   删除models.Publisher.objects.get(id=del_id).delete()
+   编辑models.Publisher.objects.get(id=edit_id).name = new_name
+       edit_publisher.save()
+        
    
    2.1# 展示所有的用户的函数
       def user_list(request):
@@ -42,3 +46,45 @@ class Book(models.Model):
                 return redirect("/user_list/")
             # 第一个请求页面的时候,就返回一个页面,页面上有两个框让用户填写
             return render(request, "add_user.html")
+            
+    2.3# 删除出版社的函数
+            def delete_publisher(request):
+                print(request.GET)
+                print("=" * 120)
+                # 删除指定的数据
+                # 1. 从GET请求的参数里面拿到将要删除的数据的ID值
+                del_id = request.GET.get("id", None)  # 字典取值,娶不到默认为None
+                # 如果能取到id值
+                if del_id:
+                    # 去数据库删除当前id值的数据
+                    # 根据id值查找到数据
+                    del_obj = models.Publisher.objects.get(id=del_id)
+                    # 删除
+                    del_obj.delete()
+                    # 返回删除后的页面,跳转到出版社的列表页,查看删除是否成功
+                    return redirect("/publisher_list/")
+                else:
+                    return HttpResponse("要删除的数据不存在!")
+    2.4# 编辑出版社
+        def edit_publisher(request):
+        # 用户修改完出版社的名字,点击提交按钮,给我发来新的出版社名字
+        if request.method == "POST":
+            print(request.POST)
+            # 取新出版社名字
+            edit_id = request.POST.get("id")
+            new_name = request.POST.get("publisher_name")
+            # 更新出版社
+            # 根据id取到编辑的是哪个出版社
+            edit_publisher = models.Publisher.objects.get(id=edit_id)
+            edit_publisher.name = new_name
+            edit_publisher.save()  # 把修改提交到数据库
+            # 跳转出版社列表页,查看是否修改成功
+            return redirect("/publisher_list/")
+        # 从GET请求的URL中取到id参数
+        edit_id = request.GET.get("id")
+        if edit_id:
+            # 获取到当前编辑的出版社对象
+            publisher_obj = models.Publisher.objects.get(id=edit_id)
+            return render(request, "edit_publisher.html", {"publisher": publisher_obj})
+        else:
+            return HttpResponse("编辑的出版社不存在!")
