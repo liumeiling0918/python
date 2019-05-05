@@ -88,3 +88,170 @@ class Book(models.Model):
             return render(request, "edit_publisher.html", {"publisher": publisher_obj})
         else:
             return HttpResponse("编辑的出版社不存在!")
+            
+            
+   3.对publisher表进行展示在表格中：
+   urls配置：
+     url(r'add_publisher/',views.add_publisher),
+    url(r'^publisher_list/',views.publisher_list),
+    url(r'^edit_publisher/',views.edit_publisher),
+    url(r'^delete_publisher/',views.delete_publisher),
+    
+   publisher.html代码:
+        <table class="table table-bordered">
+        <thead>
+        <tr>
+
+            <th>id</th>
+            <th>出版社名称</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for publisher in publisher_list %}
+            <tr>
+                <td>{{ publisher.id }}</td>
+                <td>{{ publisher.name }}</td>
+                <td>{{ publisher.addr }}</td>
+                <td>
+                    <a class="btn btn-danger" href="/delete_publisher/?id={{ publisher.id }}">删除</a>
+                    <a class="btn btn-info" href="/edit_publisher/?id={{ publisher.id }}">编辑</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <a href="/add_publisher/">新增</a>
+    
+   views.publisher_list中的代码：
+           def publisher_list(request):
+            publishers=models.Publisher.objects.all()
+            return render(request,"publisher_list.html",{"publisher_list":publishers})
+   views.edit_publisher中的代码：
+       def edit_publisher(request):
+        if request.method=="GET":
+            publisher_id=request.GET.get("id")
+            if publisher_id:
+                publisher_obj=models.Publisher.objects.get(id=publisher_id)
+                return render(request,"edit_publisher.html",{"publisher":publisher_obj})
+            else:
+                return HttpResponse("编辑的出版社不存在")
+        else:
+            #post方法
+            new_name=request.POST.get("publisher_name",None)
+            new_addr=request.POST.get("publisher_addr",None)
+            edit_id=request.POST.get("id",None)
+            print(new_name)
+            print(new_addr)
+            print(edit_id)
+            publisher_obj=models.Publisher.objects.get(id=edit_id)
+            publisher_obj.name=new_name
+            publisher_obj.addr=new_addr
+            publisher_obj.save()
+            return redirect("/publisher_list/")
+            
+ 4.多表联合
+   表格结构：
+   from django.db import models
+    class Publisher(models.Model):
+        id=models.AutoField(primary_key=True)
+        name=models.CharField(max_length=64,null=False,unique=True)
+        addr=models.CharField(max_length=128)
+
+    class Book(models.Model):
+        id=models.AutoField(primary_key=True)
+        title=models.CharField(max_length=64,null=False,unique=True)
+        publisher=models.ForeignKey(to="Publisher")
+        Book 表格含有三个字段：id title publisher_id
+        
+        urls配置：
+        url(r'^add_book/',views.add_book),
+        url(r'^book_list/',views.book_list),
+        url(r'^edit_book/',views.edit_book),
+        url(r'^delete_book/',views.delete_book)
+        
+        bool_list.html在表格中展示：
+         <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>书名</th>
+            <th>出版社</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for book in book_list %}
+            <tr>
+                <td>{{ book.id }}</td>
+                <td>{{ book.title }}</td>
+                <td>{{ book.publisher.name }}</td>
+                <td>
+                    <a href="/edit_book/?id={{ book.id }}">编辑</a>
+                    <a href="/delete_book/?id={{ book.id }}">删除</a>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    add_book.html:
+    <form action="/add_book/" method="post">
+        <p>
+            书名：<input type="text" name="book_title">
+        </p>
+        <p>出版社
+            <select name="publisher">
+                {% for publisher in publisher_list %}
+                <option value="{{ publisher.id }}">{{ publisher.name }}</option>
+                {% endfor %}
+            </select>
+        </p>
+    <p>
+        <input type="submit" value="提交">
+    </p>
+    </form>
+多表联合的增删改查代码:
+def add_book(request):
+    if request.method=="POST":
+        title=request.POST.get("book_title",None)
+        publisher_id=request.POST.get("publisher",None)
+        models.Book.objects.create(title=title,publisher_id=publisher_id)
+        #需要修改
+        return redirect("/book_list/")
+    publishers=models.Publisher.objects.all()
+    return render(request,"add_book.html",{"publisher_list":publishers})
+
+def book_list(request):
+    books=models.Book.objects.all()
+    return render(request,"book_list.html",{"book_list":books})
+
+def edit_book(request):
+    if request.method=="GET":
+        id=request.GET.get("id")
+        book_obj=models.Book.objects.get(id=id)
+        return render(request,"edit_book.html",{"book":book_obj})
+    else:
+        #post方法
+        id=request.POST.get("id",None)
+        title=request.POST.get("book_title",None)
+        publisher_name=request.POST.get("publisher_name",None)
+        publisher=models.Publisher.objects.get(name=publisher_name)
+        book=models.Book.objects.get(id=id)
+        book.title=title
+        book.publisher_id=publisher.id
+        book.save()
+        return redirect("/book_list/")
+
+def delete_book(request):
+    if request.method=="GET":
+        id=request.GET.get("id")
+        book=models.Book.objects.get(id=id)
+        book.delete()
+        return redirect("/book_list/")
+    
+    
+        
+    
+            
+   
+   
