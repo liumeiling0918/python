@@ -65,3 +65,7 @@ def wahaha():
         字典推导式# mcase = {'a': 10, 'b': 34}
                 # mcase_frequency = {mcase[k]: k for k in mcase}
         集合推导式，自带结果去重功能{x**2 for x in [1, -1, 2]}
+6.判断是否可迭代
+ isinstance(obj,Iterable)
+ '__iter__' in dir(obj)  dir()查看其拥有的方法 
+ 
