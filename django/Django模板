@@ -1,0 +1,79 @@
+    1.变量{{}}
+    name_list = ['张三', '李四', '王五']
+    name_list2 = [['张三0', '李四0', '王五0'], ['张三1', '李四1', '王五1']]
+    name_dict = {'name1': '小黑', 'name2': '长江', 'name3': '诸葛亮'}
+    p1 = Person('小白', 9000)
+    p2 = Person('小黑', 10000)
+    {#列表#}
+      <hr>
+      {{ name_list }}
+      {{ name_list.0 }}
+      {{ name_list.1 }}
+      {{ name_list.2 }}
+      <hr>
+      <ol>
+          {% for name in name_list %}
+          <li>{{ name }}</li>
+          {% endfor %}
+
+      </ol>
+      {#字典#}
+      <hr>
+      {{ name_dict }}
+      {{ name_dict.name1 }}
+      {% for name in name_list %}
+          {{ name }}
+      {% endfor %}
+      {#对象#}
+      <hr>
+      {{ p1 }}
+      {{ p1.name }}
+      {{ p1.age }}#调用对象的属性
+      {{ p1.run }} #调用对象的方法
+      
+ 2.过滤器：
+ {{value|filter_name:参数}} 将变量value使用过滤器filter_name过滤之后显示
+ 常用内置过滤器：
+  default: {{ value|default:"nothing"}} 如果value没有传值或者值为空的话就显示默认值nothing
+  length:{{ value|length }}返回value的长度，如 value=['a', 'b', 'c', 'd']的话，就显示4.
+  filesizeformat:{{ value|filesizeformat }}将值格式化为一个 “人类可读的” 文件尺寸。 如果 value 是 123456789，输出将会是 117.7 MB。
+  slice:{{value|slice:"2:-1"}} 切片
+  date:{{ value|date:"Y-m-d H:i:s"}} 格式化
+  safe:{ value|safe}} {#safe解析代码,不加safe则转化成字符串，并不会进行解析#}
+      a_html = "<a href='http://www.sogo.com'>我是后端传过来的a标签</a>"
+      <p>a标签(加safe)：{{ a_html|safe }}</p> #解析成超链接
+      <p>a标签(不加safe):{{ a_html }}</p> #显示字符串，不解析
+  truncatechars:{{ value|truncatechars:9}} 在一定数量的字符后截断字符串。截断9个以外的字符数
+    {#超过20个字符后则显示...#}
+   <p>大段的文本：{{ p_str|truncatechars:20 }}</p>
+  join:{{value|join:','}} 连接
+  
+ 3.自定义的过滤器：
+  在app中创建一个templatetag文件夹
+  自定义过滤器：
+        from django import template
+      register=template.Library()
+      # 告诉Django的模板语言我现在有一个自定义的filter方法，名字叫happy
+        @register.filter(name="happy")
+        def add_happy(value):
+            return "{} happy".format(value)
+
+        @register.filter(name="addstr")
+        def add_str(value,args1):
+            """
+                第一个参数永远是管道符前面那个变量
+                :param value: 管道符前面那个变量
+                :param arg1: 冒号后面的变量
+                :return:
+                """
+            return "{} is {}".format(value,args1)
+   使用自定义过滤器：
+        {% load myfilter %} 导入过滤器文件名
+        {{ name|happy }}
+        {{ name|addstr:"hello world" }}
+   
+
+  
+  
+   
+  
