@@ -66,7 +66,7 @@
         # 例如ret = re.match('a', 'abc').group()
         #     print(ret)结果 : 'a'
         # 例如re.match(' [a-z]+', 'eva egon yuan') None('eva egon yuan'开头没有空格，所以返回None)
-        #     re.search(' [a-z]+', 'eva egon yuan') 空格egon空格yuan
+        #     re.search(' [a-z]+', 'eva egon yuan') 空格egon
 
         # 含有分组功能的match()与含有分组功能的search（）类似
         # import re
