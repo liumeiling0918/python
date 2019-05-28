@@ -30,6 +30,7 @@
       {{ p1.name }}
       {{ p1.age }}#调用对象的属性
       {{ p1.run }} #调用对象的方法
+      当对象的属性与方法重名时，优先调用属性
       
  2.过滤器：
  {{value|filter_name:参数}} 将变量value使用过滤器filter_name过滤之后显示
@@ -39,7 +40,7 @@
   filesizeformat:{{ value|filesizeformat }}将值格式化为一个 “人类可读的” 文件尺寸。 如果 value 是 123456789，输出将会是 117.7 MB。
   slice:{{value|slice:"2:-1"}} 切片
   date:{{ value|date:"Y-m-d H:i:s"}} 格式化
-  safe:{ value|safe}} {#safe解析代码,不加safe则转化成字符串，并不会进行解析#}
+  safe:{ {value|safe}} {#safe解析代码,不加safe则转化成字符串，并不会进行解析#}
       a_html = "<a href='http://www.sogo.com'>我是后端传过来的a标签</a>"
       <p>a标签(加safe)：{{ a_html|safe }}</p> #解析成超链接
       <p>a标签(不加safe):{{ a_html }}</p> #显示字符串，不解析
