@@ -50,7 +50,7 @@
     import re
     r=r'.*?<i>.*?(\d+)'
     com=re.compile(r,re.S)
-    ret=re.findall(com,'3333<i>sfa(9999)')
+    ret=re.findall(com,'3333<i>sfa9999')
     print(ret) #['9999']
  re.I(IGNORECASE)忽略大小写，括号内是完整的写法
 re.M(MULTILINE)多行模式，改变^和$的行为
