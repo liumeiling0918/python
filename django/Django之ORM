@@ -1,0 +1,156 @@
+1. ORM已经的学过的内容：
+		1. Django项目如何使用ORM连接MySQL
+			1. 手动创建数据库
+			2. 在settings.py里面配置一下数据库的连接信息（告诉Django连接哪一个数据库）
+				DATABASES = {
+					'default': {
+						'ENGINE': 'django.db.backends.mysql',  # 连接数据库的类型
+						'NAME': 'day62xiawu',  # 数据库名字
+						'HOST': '127.0.0.1',  # IP
+						'PORT': 3306,  # 端口
+						'USER': 'root',  # 用户名
+						'PASSWORD': '123456',  # 密码
+					}
+				}
+			3. 在和settings.py同目录下的__init__.py文件中，告诉Django用pymysql代替MySQLdb来连接数据库
+				import pymysql
+				pymysql.install_as_MySQLdb()
+			4. 在app/models.py中，定义类，类一定要继承models.Model
+				class Book(models.Model):
+					id = models.AutoField(primary_key=True)
+					title = models.CharField(max_length=32)
+			5. 执行两条命令
+				1. 在哪儿执行？
+					在项目的根目录（有manage.py文件的那个目录）
+				2. 命令
+					python manage.py makemigrations   --> 将models.py文件中的改动记录在小本本（app/migrations/00xx_****.py）上
+					
+					python manage.py migrate           --> 将改动翻译成SQL语句，去数据库中执行
+		2. 表和表之间的关系
+			1. 一对多（书和出版社）
+				class Publisher(models.Model):
+					id=models.AutoField(primary_key=True)
+					name=models.CharField(max_length=22,unique=True)
+
+				class Book(models.Model):
+					id=models.AutoField(primary_key=True)
+					title=models.CharField(max_length=32)
+					# 一对一的关联，一本书对应一个出版社
+					publisher=models.ForeignKey(to="Publisher")
+
+				在数据库中：
+					有没有publisher这个字段？
+					数据库中实际 生成的是一个 publisher_id 字段
+				
+			2. 多对多（作者和书）
+				class Author(models.Model):
+					id=models.AutoField(primary_key=True)
+					name=models.CharField(max_length=32)
+					# 一对多的关联，一个作者对应多本书
+					books=models.ManyToManyField(to="Book")
+				
+				在数据库中：
+					是通过第三张表建立的关系
+
+		3. 增删改查操作
+			1. 单表增删改查
+				增：
+					models.Publisher.objects.create(name="沙河出版社")
+				查：
+					models.Publisher.objects.get(id=1)
+					models.Publisher.objects.get(name="沙河出版社")
+				删：
+					models.Publisher.objects.get(id=1).delete()
+				改：
+					obj = models.Publisher.objects.get(id=1)
+					obj.name = "沙河第二出版社"
+					obj.save()
+			2. 外键的增删改查
+				增、删、查同上
+				一本书对应一个出版社
+				book_obj = models.Book.objects.get(id=1)
+				
+				book_obj.publisher 是什么？    *****
+					和我这本书关联的出版社对象
+					
+					book_obj.publisher.id    和我这本书关联的出版社的id值
+					book_obj.publisher.name  和我这本书关联的出版社的名称
+					
+				book_obj.publisher_id 是什么？
+					和我这本书关联的出版社的id值
+					
+			3. 多对多操作
+				
+				1. 查id为1的作者都写过的书？一个作者对应多本书
+					author_obj = models.Author.objects.get(id=1)
+					author_obj.books.all()     --> 和我这个作者关联的所有书对象
+				2. 想给作者绑定多本书？ 一个作者对应多本书
+					author_obj = models.Author.objects.get(id=1)
+					author_obj.books.set([1,2,3]) --> 把id是1、2、3的书和我这个作者关联上
+				
+2. 今日内容
+
+		1. Django ORM常用字段：
+			1. AutoField       --> int自增  (当model中如果没有自增列，则自动会创建一个列名为id的列)
+			2. CharField       --> varchar(xx)
+			3. ForeignKey      --> 外键 (models.ForeignKey(to=’表名‘ 或者 to_field='表格的主键'))
+			4. ManyToManyField --> 多对多关联
+			
+			5. DateField
+			6. DateTimeField
+			
+			7. IntegerField
+			
+			
+		2. 自定义char字段
+			class FixedCharField(models.Field):
+				"""
+				自定义的char类型的字段类
+				"""
+				def __init__(self, max_length, *args, **kwargs):
+					self.max_length = max_length
+					super(FixedCharField, self).__init__(max_length=max_length, *args, **kwargs)
+
+				def db_type(self, connection):
+					"""
+					限定生成数据库表的字段类型为char，长度为max_length指定的值
+					"""
+					return 'char(%s)' % self.max_length
+					
+			class Person(models.Model):
+				name = models.CharField(max_length=32)
+				new_name = FixedCharField(max_length=64, default="张三")  # char(64)
+				age = models.IntegerField(default=18)
+				birthday = models.DateField(auto_now_add=True)
+						
+			
+		3. 常用的字段参数
+			1. null
+			2. default
+			3. unique
+			4. db_index 建立索引
+			
+			5. DateField和DateTimeField才有的参数：
+				auto_now_add=True     --> 创建数据的时候自动把当前时间赋值
+				auto_add=True         --> 每次更新数据的时候更新当前时间
+				
+				上述两个不能同时设置！！！
+			
+			5. class Meta:
+				 db_table = "表名"
+				 
+			class Book(models.Model):
+				id = models.AutoField(primary_key=True)
+				title = models.CharField(max_length=32)
+				# 外键
+				publisher = models.ForeignKey(to="Publisher", on_delete=models.CASCADE, db_constraint=False)
+			   #on_delete=models.CASCADE  级联操作（Book表中含有publisher字段） publisher删除时，所关联的book表也会删除
+				# db_constraint=False 拒绝在表格级别做外键，只能通过代码控制表格之间关系。
+				# db_constraint=False 时说明该外键语句只是起到提示，不会有真正的关联操作
+
+				def __str__(self):
+					return self.title
+
+				class Meta:
+					db_table = "book"
+				 # 通过Meta自定义表名
