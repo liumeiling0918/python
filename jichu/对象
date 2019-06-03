@@ -354,7 +354,7 @@
     # tiger = Person('泰哥')
     # print(tiger.name1) #调用的是@property修饰的函数  泰哥sb
     # tiger.name1 = '全班' #调用的是@setter修饰的函数 
-    # print(tiger.name1) #调用的是@property修饰的函数 全班
+    # print(tiger.name1) #调用的是@property修饰的函数 全班sb
     
     # from math import pi
     # class Circle:
