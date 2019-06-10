@@ -379,14 +379,26 @@ http://www.cnblogs.com/liwenzhou/p/8660826.html
 		    # publisher_obj.book_set.clear()
 
 
-		    # 5.执行原生SQL
-		    # 更高灵活度的方式执行原生SQL语句
-		    # from django.db import connection
-		    #
-		    # cursor = connection.cursor()  # cursor = connections['default'].cursor()
-		    # cursor.execute("SELECT * from app01_book where id = %s", [1])
-		    # ret = cursor.fetchone()
-		    # print(ret)
+		    # 5.在Setting中配置LoGGING，显示ORM对应的SQL语句
+		    LOGGING = {
+			    'version': 1,
+			    'disable_existing_loggers': False,
+			    'handlers': {
+				'console':{
+				    'level':'DEBUG',
+				    'class':'logging.StreamHandler',
+				},
+			    },
+			    'loggers': {
+				'django.db.backends': {
+				    'handlers': ['console'],
+				    'propagate': True,
+				    'level':'DEBUG',
+				},
+			    }
+			}
+		    
+		    
 
 		    # 6.聚合
 		    from django.db.models import Avg, Sum, Max, Min, Count
