@@ -301,17 +301,17 @@ print('stderr:',res.stderr.read().decode('gbk'))
     第二种解决方法：使用struct模块
     #struct模块
     # 将数据转成固定长度的bytes
-    pack 将数据转换成固定长度的字节
+    pack 将数据以某种类型转换成固定长度的字节
     unpack得到的是一个元组，元组的第一个元素就是数据
     import struct
-    ret=struct.pack('i',4096) #i表示int 即把一个数字转成固定长度的bytes类型
+    ret=struct.pack('i',4096) #i表示int 即把数字4096转成固定长度的bytes类型.(数字压缩后的固定长度为4字节)
     print(ret,len(ret)) #b'\x00\x10\x00\x00' 以4个字节压缩
     r=struct.unpack('i',ret)  #返回一个元组 (4096,)
     print(r)
     struct的简单版：
     server端：
     import socket
-    import struct1
+    import struct
     sk = socket.socket()
     sk.bind(('127.0.0.1',8090))
     sk.listen()
@@ -324,7 +324,7 @@ print('stderr:',res.stderr.read().decode('gbk'))
             break
         conn.send(cmd.encode('utf-8'))
         num=conn.recv(4) #4
-        num=struct1.unpack('i',num)[0] #2048
+        num=struct.unpack('i',num)[0] #2048
         print('stdout+stderr: ',conn.recv(int(num).decode('gbk'))) #2048
     conn.close()
     sk.close()
@@ -389,10 +389,11 @@ print('stderr:',res.stderr.read().decode('gbk'))
         sk.connect(('127.0.0.1',8090))
         buffer=1024 #内核态缓存的大小 即每次发送文件时的大小
         #发送文件
-        head={'filepath':'G:\python视频\Python全栈9期（第一部分）：基础+模块+面向对象+网络编程\day32',
+        head={
                 'filename':'01 python fullstack s9day32 复习.mp4',
                 'filesize':None
         }
+        filepath='G:\python视频\Python全栈9期（第一部分）：基础+模块+面向对象+网络编程\day32'
         filepath=os.path.join(head['filepath'],head['filename'])
         filesize=os.path.getsize(filepath)
         head['filesize']=filesize
