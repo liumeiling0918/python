@@ -253,30 +253,12 @@ print('stderr:',res.stderr.read().decode('gbk'))
 #解决方案1：发送方将数据的大小发送给接收方，接收方收到以后发送确认消息给发送方，然后发送方发送数据
     # 好处：确定了接收数据的大小
     # 坏处：多了一次交互的过程（发送方将数据的大小发送给接收方，接收方收到以后发送确认消息给发送方）
-    # 例如当发送方发送了35672字节，
-    #     while(data>0):
-    #         if data>4096:
-    #             send(4096)
-    #             data=data-4096
-    #         else:
-    #             send(data)
-                # data=data-4096
-
-    # 例如当接收方接收了35672字节，
-    #     while(data>0):
-    #         if data>2048:
-    #             recv(2048)
-    #             data=data-2048
-    #         else:
-    #             recv(data)
-    #             data=data-2048
     例如：使用该方法解决远程执行命令的黏包问题
     server端：
     import socket
     sk = socket.socket()
     sk.bind(('127.0.0.1',8090))
     sk.listen()
-
     conn,addr = sk.accept()
     while True:
         cmd = input('cmd : ')
@@ -286,9 +268,16 @@ print('stderr:',res.stderr.read().decode('gbk'))
         conn.send(cmd.encode('utf-8'))
         num = int(conn.recv(1024).decode('utf-8')) #接受数据的长度
         conn.send(b'ok')
-        print('stdout+stderr: ',conn.recv(num).decode('gbk'))
+        while num>0:
+            if num<2046:
+                print('stdout+stderr: ',conn.recv(num).decode('gbk'))
+                num=0
+            else:
+                print('stdout+stderr: ',conn.recv(2046).decode('gbk'))
+                num=num-2046               
     conn.close()
     sk.close()
+    
     client端：
     import socket
     import subprocess
@@ -300,8 +289,7 @@ print('stderr:',res.stderr.read().decode('gbk'))
         res = subprocess.Popen(cmd,shell=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.PIPE)
-        # sk.send(res.stdout.read())  #管道中的数据只能读一次
-        # sk.send(res.stderr.read())
+        #管道中的数据只能读一次
         std_out=res.stdout.read()
         std_err=res.stderr.read()
         sk.send(str(len(std_out)+len(std_err)).encode('utf-8'))
