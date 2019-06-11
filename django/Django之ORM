@@ -471,3 +471,368 @@ http://www.cnblogs.com/liwenzhou/p/8660826.html
 		    # Q查询和字段查询同时存在时， 字段查询要放在Q查询的后面
 		    # ret = models.Book.objects.filter(Q(maichu__gt=1000) | Q(price__lt=100), title__contains="金老板")
 		    # print(ret)
+		    
+		    事务
+				1. 保证数据的原子性操作！！！
+			try:
+				from django.db import transaction
+				with transaction.atomic():
+					new_publisher = models.Publisher.objects.create(name="火星出版社")
+					models.Book.objects.create(title="橘子物语", publish_date=datetime.date.today(), publisher_id=10)  # 指定一个不存在的出版社id
+			except Exception as e:
+				print(str(e))
+	1. ORM
+		1. ORM常用字段和属性
+			1. AutoField(primary_key=True) 
+				id = models.AutoField(primary_key=True)
+			2. CharField(max_length=32)
+				title = models.CharField(max_length=32)
+			3. IntgerField()
+				 kucun = models.IntegerField(default=1000)
+			4. DateField()
+			5. DateTimeField()
+				1. auto_now_add    --> 创建的时候自动填充当前时间
+				2. auto_now        --> 每次修改的时候自动把当前时间更新
+				3.定义小数：price = models.DecimalField(max_digits=5, decimal_places=2, default=99.99)
+							#max_digits小数的总长度 decimal_places小数点后面的位数
+				
+		2. 关系字段
+			1. ForeignKey(to="类名"，related_name=“xx”)   --> 1对多  ，外键通常设置在多的那一边、
+			2. ManyToMany(to="类名",related_name="xx")    --> 多对多，通常设置在正向查询多的那一边
+			
+
+		3. ORM一般操作
+			1. 必知必会13条
+				1. 返回QuerySet对象的
+					1. all()
+					2. filter()
+					3. values()
+					4. values_list()
+					5. exclude()
+					6. order_by()
+					7. reverse()
+					8. distinct() 剔除重复记录
+				2. 返回具体对象的
+					1. get()
+					2. first()
+					3. last()
+				3. 返回布尔值的
+					1. exists()
+				4. 返回具体数值的
+					1. count()
+			2. 单表查询的双下划线
+				1. models.Book.objects.filter(id__gt=1, id__lt=4) gt大于  lt小于
+				2. models.Book.objects.filter(id__in=[1,2,3])
+				3. models.Book.objects.filter(id__range=[1,5])
+				4. models.Book.objects.filter(title__contains="沙河")
+				5. models.Book.objects.filter(title__icontains="沙河")
+				6. models.Book.objects.filter(title__startswith="沙河")
+				7. models.Book.objects.filter(title__endswith="沙河")
+				8. models.Book.objects.filter(publish_date__year=2017)
+				9. models.Book.objects.filter(publish_date__month=2)
+			3. 外键的跨表查询
+				1. 正向查找
+					1. 基于对象
+						book_obj = models.Book.object.get(id=1)
+						book_obj.publisher.name
+					
+					2. 基于双下划线的
+						models.Book.object.filter(id=1).values("publisher__name")
+					
+				2. 反向查找（由出版社查书）
+					1. 基于对象
+						publisher_obj = models.Publisher.objects.get(id=1)
+						默认反向查找的时候是表名加_set
+							publisher_obj.book_set.all()
+						如果在外键中设置了related_name="books"
+							publisher_obj.books.all()
+					
+					2. 基于双下划线
+						models.Publisher.objects.filter(id=1).values("book__title")
+						如果配置了related_query_name="books" 或者配置了related_name="books"
+						models.Publisher.objects.filter(id=1).values("books__title")
+					
+			4. 分组和聚合
+				1. 聚合
+					from django.db.models import Avg, Sum, Max, Min, Count
+					models.Book.objects.all().aggregate(Avg("price"))
+				2. 分组
+					book_list = models.Book.objects.all().annotate(author_num=Count("author"))
+			
+			5. F和Q
+				1. 当需要字段和字段作比较的时候用F查询
+				from django.db.models import F
+				models.Book.objects.filter(commnet_num__gt=F('keep_num'))
+				2. 当查询条件是 或 的时候 用Q查询，因为默认的filter参数都是且的关系
+				models.Book.objects.filter(Q(authors__name="小仙女")|Q(authors__name="小魔女"))
+				
+			6. 事务
+				1. 保证数据的原子性操作！！！
+			try:
+				from django.db import transaction
+				with transaction.atomic():
+					new_publisher = models.Publisher.objects.create(name="火星出版社")
+					models.Book.objects.create(title="橘子物语", publish_date=datetime.date.today(), publisher_id=10)  # 指定一个不存在的出版社id
+			except Exception as e:
+				print(str(e))
+			7. 执行原生的SQL语句（了解即可）
+
+2. ORM 一对一
+	1. 什么时候用一对一？
+		当 一张表的某一些字段查询的比较频繁，另外一些字段查询的不是特别频繁
+		把不怎么常用的字段 单独拿出来做成一张表 然后用过一对一关联起来
+		
+	2. 优势
+			既保证数据都完整的保存下来，又能保证大部分的检索更快
+			
+	3. ORM中的用法
+		OneToOneField(to="")
+	例如Author与Author_detail为一对一的关系：
+	class Author(models.Model):
+		name = models.CharField(max_length=32)
+		age = models.IntegerField()
+		phone = models.IntegerField()
+		detail = models.OneToOneField(to="AuthorDetail")
+
+	class AuthorDetail(models.Model):
+		# 爱好
+		hobby = models.CharField(max_length=32)
+		# 地址
+		addr = models.CharField(max_length=128)
+	
+	 一对一的查询
+    # author_obj = models.Author.objects.get(id=1)
+    # obj = author_obj.detail
+    # print(obj.hobby, obj.addr)
+   
+
+3. ORM 多对多的三种方式
+	多对多的方式：
+		1. ORM自动帮我创建第三张表
+		#作者
+		class Author(models.Model):
+			name = models.CharField(max_length=32)
+			age = models.IntegerField()
+			phone = models.IntegerField()
+			books = models.ManyToManyField(to="Book", related_name="authors")
+			#related_name="authors"反向查询时使用
+			
+		# 书
+		class Book(models.Model):
+			title = models.CharField(max_length=32)
+			publish_date = models.DateField(auto_now_add=True)
+			price = models.DecimalField(max_digits=5, decimal_places=2)
+			
+			
+		Terminal输入：python manage.py makemigrations app01
+					python manage.py  migrate app01
+					
+		from app01 import models
+			# 1.第一种方式：在app01 里面 查询 id是1的作者关联的书
+			from app01 import models
+			ret = models.Author.objects.get(id=1).books.all()
+			# 从作者id为1所关联的书里面移除id是1的书
+			models.Author.objects.get(id=1).books.remove(1)
+		
+		2. 自己创建第三张表， 利用外键分别关联作者和书
+			关联查询比较麻烦，因为不能使用ORM提供的便利方法
+			# 自己动手 创建作者和书关联的第三张表
+			# 此时 在ORM层面 作者和书就没有多对多的关系了
+			
+			# 作者
+			class Author(models.Model):
+				name = models.CharField(max_length=32)
+				age = models.IntegerField()
+				phone = models.IntegerField()
+				
+			#书
+			class Book(models.Model):
+				title = models.CharField(max_length=32)
+				publish_date = models.DateField(auto_now_add=True)
+				price = models.DecimalField(max_digits=5, decimal_places=2)
+				
+			class Author2Book(models.Model):
+				id = models.AutoField(primary_key=True)
+				# 作者id
+				author = models.ForeignKey(to="Author")
+				# 书id
+				book = models.ForeignKey(to="Book")
+				class Meta:
+					# 建立唯一约束
+					unique_together = ("author", "book") #在Author2Book中，相同的 author_id和 book_id的记录唯一
+
+			Terminal输入：python manage.py makemigrations app02
+					python manage.py  migrate app02
+					
+			在app02 里面查询id是1的作者关联的书
+			# 不能使用ORM提供的便利方法,不能通过作者查询书（例如app01中的方法）
+			# 通过操作第三张表进行查询
+			from app02 import models
+			ret = models.Author2Book.objects.filter(author_id=1).values_list("book_id") 
+			# id是1的作者关联的书的id
+			print(ret) #queryset对象 每个对象为元祖格式
+			ret = [i[0] for i in ret] #利用列表生成式获取book_id
+			# 查书这张表
+			ret = models.Book.objects.filter(id__in=ret)
+			print(ret)
+			
+		3. 自己创建第三张表，使用ORM 的ManyToManyFiled()
+			 使用此种方式创建多对多表的时候，没有 add() remove() 等方法
+			 # 作者
+			class Author(models.Model):
+				name = models.CharField(max_length=32)
+				age = models.IntegerField()
+				phone = models.IntegerField()
+				# 通过through，through_fields来指定使用我创建的第三张表来构建多对多的关系
+				books = models.ManyToManyField(to="Book", through="Author2Book", through_fields=("author", "book",))
+				# 注意through_fields字段的顺序
+				# 第一个字段： 多对多设置在哪一张表里（设置在Author）， 第三张表通过什么字段找到这张表(通过Author获取Author2Book表) 就把这个字段写在前面
+
+							# 书
+			class Book(models.Model):
+				title = models.CharField(max_length=32)
+				publish_date = models.DateField(auto_now_add=True)
+				price = models.DecimalField(max_digits=5, decimal_places=2)
+				
+			# 自己动手 创建作者和书关联的第三张表
+			# 此时 在ORM层面
+			class Author2Book(models.Model):
+				id = models.AutoField(primary_key=True)
+				# 作者id
+				author = models.ForeignKey(to="Author")
+				# 书id
+				book = models.ForeignKey(to="Book")
+				# memo
+				memo = models.CharField(max_length=64, null=True)
+
+				class Meta:
+					# 建立唯一约束
+					unique_together = ("author", "book") #在Author2Book中，相同的 author_id和 book_id的记录唯一
+					
+
+					
+			Terminal输入：python manage.py makemigrations app03
+					python manage.py  migrate app03
+					
+			 # 在app03 里面 查询 id是1的作者关联的书
+			from app03 import models
+			ret = models.Author.objects.get(id=1).books.all()
+			print(ret)
+			# 从作者关联的书里面移除id是1的书
+			# 没有django ORM 封装的那些快捷方式了，我们要自己操作第三张表
+			models.Author2Book.objects.get(author_id=1, book_id=1).delete()
+		
+	我们应该用哪种？
+		看情况：
+			1. 如果你第三张表没有额外的字段，就用第一种
+			2. 如果你第三张表有额外的字段，就用第三种或第一种
+		
+	第三种方式的事例：	
+		相亲网站：
+			Boy
+				girls = ManyToManyField(to=“Girl"，through="约会记录",through_fields=("Boy", "Girl",))
+			
+			Girl
+			
+			约会记录：多对多
+				id  boy_id girl_id  date
+	
+	对三种建立多对多表的方式的增删查操作：
+			from app01 import models
+			# 1.第一种方式：在app01 里面 查询 id是1的作者关联的书
+			from app01 import models
+			ret = models.Author.objects.get(id=1).books.all()
+			# 从作者id为1所关联的书里面移除id是1的书
+			models.Author.objects.get(id=1).books.remove(1)
+
+			# 2.第二种方式：在app02 里面查询id是1的作者关联的书
+			# 不能使用ORM提供的便利方法,不能通过作者查询书（例如app01中的方法）
+			# 通过操作第三张表进行查询
+			from app02 import models
+			ret = models.Author2Book.objects.filter(author_id=1).values_list("book_id")
+			# id是1的作者关联的书的id
+			print(ret) #queryset对象
+			ret = [i[0] for i in ret] #利用列表生成式获取book_id
+			# 查书这张表
+			ret = models.Book.objects.filter(id__in=ret)
+			print(ret)
+			print("app03".center(80, "-"))
+
+			#43.第三种方式： 在app03 里面 查询 id是1的作者关联的书
+			from app03 import models
+			ret = models.Author.objects.get(id=1).books.all()
+			print(ret)
+			# 从作者关联的书里面移除id是1的书
+			# 没有django ORM 封装的那些快捷方式了，我们要自己操作第三张表
+			models.Author2Book.objects.get(author_id=1, book_id=1).delete()
+
+	
+	
+
+4. ORM查询的练习题
+	1. 跨表查询
+	2. 跨多张表查询
+	 # 查找所有书名里包含沙河的书
+    ret = models.Book.objects.filter(title__contains="沙河")
+    print(ret)
+    # 查找所有出版日期是2018年的书
+    ret = models.Book.objects.filter(publish_date__year=2017)
+    print(ret)
+    # 查找价格大于10元的书
+    ret = models.Book.objects.filter(price__gt=10)
+    print(ret)
+    # 找到在沙河的出版社
+    ret = models.Publisher.objects.filter(city="沙河")
+    print(ret)
+
+    # distinct
+    # 查所有书关联的出版社
+    ret = models.Book.objects.all().values_list("publisher__name")
+    print(ret)
+    print(ret.distinct())  # 对QuerySet去重
+
+    # 将所有的书按照价格倒叙排序
+    ret = models.Book.objects.all().order_by("price").reverse()
+    print(ret)
+    # 支持负号表示倒序
+    ret = models.Book.objects.all().order_by("-price")
+    print(ret)
+
+    # 查询书名是沙河异闻录的书的出版社的city
+    ret = models.Book.objects.filter(title="沙河异闻录").values("publisher__city")
+    print(ret)
+
+    # 查询书名是沙河异闻录的书的作者的爱好（夸两张表）
+    ret = models.Book.objects.filter(title="沙河异闻录").values("authors__detail__hobby")
+    print(ret)
+
+
+	
+5. csrf简单用法
+
+	什么是CSRF ?
+		跨站请求伪造，
+		
+		
+	问题：
+		1. 钓鱼网站的页面和正经网站的页面对浏览器来说有什么区别？ （页面是怎么来的？）
+			钓鱼网站的页面是由 钓鱼网站的服务端给你返回的	
+			正经网站的网页是由 正经网站的服务端给你返回的
+			
+		2。钓鱼网站进行csrf的过程：
+			用户访问了钓鱼网站，并通过钓鱼网站给正经网站的服务端发送了请求，（例如在转账请求，钓鱼网站修改了转入账户，然后发送给了正经网站的服务端）
+			正经网站的服务端未能识别出这个一个虚假的请求，而是直接进行了处理，从而转账成功
+			解决方案：在正经网站加入校验字符（该字符钓鱼网站获取不了），使得正经网站的服务端能够识别是否是正经网站传来的请求
+		3. Django中内置了一个专门处理csrf问题的中间件
+			django.middleware.csrf.CsrfViewMiddleware（在setting中）
+			
+			这个中间件做的事情：
+				1. 在render返回页面的时候，在页面中塞了一个隐藏的input标签
+				
+				用法：
+					我们在页面上 form表单 里面 写上 {% csrf_token %}
+					
+				网页中翻译为<input type="hidden" name="csrfmiddlewaretoken" value="8gthvLKulM7pqulNl2q3u46v1oEbKG7BSwg6qsHBv4zf0zj0UcbQmpbAdijqyhfE">
+				
+				2. 当你提交POST数据的时候，它帮你做校验，如果校验不通过就拒绝这次请求
+
