@@ -7,6 +7,7 @@ def outter():
   调用方式：i=outer()
             i()
  2.装饰器:
+ 装饰一般的方法
 def timmer(f):    #装饰器函数
     def inner(*args,**kwargs):
         start = time.time()
@@ -15,6 +16,17 @@ def timmer(f):    #装饰器函数
         print(end - start)
         return ret
     return inner
+    
+装饰对象的方法（某个类中的方法）
+def timmer(f):    #装饰器函数
+    def inner(self,*args,**kwargs):
+        start = time.time()
+        ret = f(*args,**kwargs)       #被装饰的函数
+        end = time.time()
+        print(end - start)
+        return ret
+    return inner
+ #其中self代表调用该方法的对象
 
 @timmer         #语法糖 @装饰器函数名
 def func():     #被装饰的函数
